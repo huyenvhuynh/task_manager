@@ -5,3 +5,7 @@ __Name:__
 
 __Computing ID:__
 
+
+Command to install requirements: pip install -r requirements.txt   
+
+Command to run server: python manage.py runserver
