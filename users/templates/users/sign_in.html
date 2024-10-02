@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <style>
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    {% if request.session.user_data %}
+    <div>
+        <p>Email: {{ request.session.user_data.email }}</p>
+        <img src="{{ request.session.user_data.picture }}" alt="User picture">
+        <a href="/sign-out">Sign out</a>
+    </div>
+    {% else %}
+    <div>
+        
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
+
