@@ -12,7 +12,7 @@ from google.auth.transport import requests
 
 @csrf_exempt
 def sign_in(request):
-    return render(request, 'sign_in.html')
+    return render(request, 'users/sign_in.html')
 
 
 @csrf_exempt

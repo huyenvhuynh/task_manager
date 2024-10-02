@@ -14,7 +14,6 @@
     {% if request.session.user_data %}
     <div>
         <p>Email: {{ request.session.user_data.email }}</p>
-        <img src="{{ request.session.user_data.picture }}" alt="User picture">
         <a href="/sign-out">Sign out</a>
     </div>
     {% else %}
@@ -22,8 +21,8 @@
             <div id="g_id_onload"
             data-client_id="505473501624-kiq9ug3aosfmrfe46kkio67fud3cblnv.apps.googleusercontent.com"
             data-context="signin"
-            data-ux_mode="popup"
-            data-login_uri="http://127.0.0.1:8000/auth-receiver"
+            data-ux_mode="redirect"
+            data-login_uri="http://localhost:8000/auth-receiver"
             data-itp_support="true">
         </div>
 
