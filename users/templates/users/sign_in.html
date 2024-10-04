@@ -24,6 +24,11 @@
         <h1 class="text_success">You have successfully signed in!</h1>
         <p class="userEmail">Email: {{ request.session.user_data.email }}</p>
         <a href="/sign-out">Sign out</a>
+        <div class="submit">
+          <form action="{% url 'home' %}" method="get">
+            <button type="submit">Go to New Page</button>
+          </form>
+        </div>
       </div>
       {% else %}
       <div>

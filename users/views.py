@@ -14,6 +14,10 @@ from google.auth.transport import requests
 def sign_in(request):
     return render(request, 'users/sign_in.html')
 
+@csrf_exempt
+def home(request):
+    return render(request, 'users/home.html')
+
 
 @csrf_exempt
 def auth_receiver(request):
