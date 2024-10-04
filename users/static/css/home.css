@@ -1,0 +1,15 @@
+.raleway-class {
+    font-family: "Raleway", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400; /* Replace <weight> with an actual number like 400 */
+    font-style: normal;
+}
+  
+body {
+    font-family: "Raleway", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    background-color: #f4f4f4;
+    height: 100vh;
+    margin: 0;
+}
