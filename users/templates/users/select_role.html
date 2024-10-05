@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Your Role</title>
+</head>
+<body>
+    <h1>Select Your Role</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <label>
+            <input type="radio" name="role" value="user">
+            Common User
+        </label><br>
+        <label>
+            <input type="radio" name="role" value="admin">
+            Administrator
+        </label><br><br>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

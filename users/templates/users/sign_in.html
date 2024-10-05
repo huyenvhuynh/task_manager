@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  {% load static %} {% load bootstrap5 %} {% bootstrap_css %}
+  {% load static %} {% load django_bootstrap5 %} {% bootstrap_css %}
 
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
@@ -21,8 +21,20 @@
       {% if request.session.user_data %}
 
       <div>
-        <h1 class="text_success">You have successfully signed in!</h1>
+        <!-- Displaying a dynamic role-based message -->
+        <h1 class="text_success">
+          You have successfully signed in as 
+          {% if request.user.profile.role == 'admin' %} 
+            an Administrator!
+          {% else %} 
+            a Common User!
+          {% endif %}
+        </h1>
+        
+        <!-- Display user's email and name -->
         <p class="userEmail">Email: {{ request.session.user_data.email }}</p>
+        <p class="userName">Name: {{ request.session.user_data.name }}</p>
+
         <a href="/sign-out">Sign out</a>
         <div class="submit">
           <form action="{% url 'home' %}" method="get">
@@ -30,6 +42,7 @@
           </form>
         </div>
       </div>
+
       {% else %}
       <div>
         <div
