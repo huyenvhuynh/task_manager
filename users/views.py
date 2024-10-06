@@ -15,23 +15,34 @@ def google_sign_in(request):
         'google_client_id': os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
     })
     
-@login_required
-def sign_in(request):
-    profile = request.user.profile  
-    if profile.role == 'admin':
-        message = "Successfully signed in as an Administrator!"
-    else:
-        message = "Successfully signed in as a Common User!"
-    
-    return render(request, 'users/sign_in.html', {
-        'message': message,
-        'email': request.user.email,
-        'name': request.user.get_full_name(),
-    })
-
-
 def home(request):
-    return render(request, 'users/home.html')
+    if request.user.is_authenticated:
+        return render(request, 'users/home.html')
+    else:
+        return redirect('sign_in')
+
+def sign_in(request):
+    if request.user.is_authenticated:
+        # User is already authenticated, show the success message
+        profile = request.user.profile  
+        if profile.role == 'admin':
+            message = "Successfully signed in as an Administrator!"
+        else:
+            message = "Successfully signed in as a Common User!"
+        
+        context = {
+            'message': message,
+            'email': request.user.email,
+            'name': request.user.get_full_name(),
+        }
+    else:
+        # User is not authenticated, show the sign-in page
+        context = {
+            'google_client_id': os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
+        }
+    
+    return render(request, 'users/sign_in.html', context)
+
 
 
 @csrf_exempt
@@ -69,8 +80,8 @@ def auth_receiver(request):
 
         if created:
             return redirect('select_role')
-
-        return redirect('sign_in')
+        else:
+            return redirect('sign_in')  # Redirect to sign_in view for both new and returning users
 
     return HttpResponse('Invalid request method', status=405)
 
