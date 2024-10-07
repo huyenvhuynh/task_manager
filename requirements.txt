@@ -5,3 +5,4 @@ dj-database-url
 whitenoise
 python-dotenv
 google-api-python-client
+psycopg2-binary
