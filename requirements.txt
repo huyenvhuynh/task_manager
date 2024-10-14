@@ -6,4 +6,5 @@ whitenoise
 python-dotenv
 google-api-python-client
 psycopg2-binary
-boto3 django-storages
+boto3
+django-storages
