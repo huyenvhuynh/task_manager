@@ -38,11 +38,11 @@
                             <span class="nav-link">Hello, {{ user.get_full_name }}!</span>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'sign_out' %}">Sign Out</a>
+                            <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'sign_in' %}">Sign In</a>
+                            <a class="nav-link" href="{% url 'users:sign_in' %}">Sign In</a>
                         </li>
                     {% endif %}
                 </ul>

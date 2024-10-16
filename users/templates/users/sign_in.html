@@ -27,9 +27,9 @@
               <p class="userEmail">Email: {{ user.email }}</p>
               <p class="userName">Name: {{ user.get_full_name }}</p>
 
-              <a href="{% url 'sign_out' %}">Sign out</a>
+              <a href="{% url 'users:sign_out' %}">Sign out</a>
               <div class="submit">
-                  <form action="{% url 'home' %}" method="get">
+                  <form action="{% url 'myapp:home' %}" method="get">
                       <button type="submit">Go to Home Page</button>
                   </form>
               </div>
@@ -40,7 +40,7 @@
                     data-client_id="{{ google_client_id }}"
                     data-context="signin"
                     data-ux_mode="redirect"
-                    data-login_uri="{% url 'auth_receiver' %}"
+                    data-login_uri="{% url 'users:auth_receiver' %}"
                     data-auto_prompt="false">
               </div>
 

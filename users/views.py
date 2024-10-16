@@ -14,12 +14,7 @@ def google_sign_in(request):
     return render(request, 'users/sign_in.html', {
         'google_client_id': os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
     })
-    
-def home(request):
-    if request.user.is_authenticated:
-        return render(request, 'users/home.html')
-    else:
-        return redirect('sign_in')
+
 
 def sign_in(request):
     if request.user.is_authenticated:
@@ -81,7 +76,7 @@ def auth_receiver(request):
         if created:
             return redirect('select_role')
         else:
-            return redirect('sign_in')  # Redirect to sign_in view for both new and returning users
+            return redirect('users:sign_in')  # Redirect to sign_in view for both new and returning users
 
     return HttpResponse('Invalid request method', status=405)
 
@@ -115,4 +110,4 @@ def select_role(request):
 def sign_out(request):
     del request.session['user_data']  
     logout(request)  
-    return redirect('sign_in')
+    return redirect('users:sign_in')
