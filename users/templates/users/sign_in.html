@@ -14,7 +14,11 @@
 <body>
   <div class="container">
       {% if user.is_authenticated %}
-          <div>
+      <!-- replaced to redirect directly to home page when user logs in -->
+        <script type="text/javascript">
+            window.location.href = "{% url 'myapp:home' %}";
+        </script>
+          <!-- <div>
               <h1 class="text-success">
                   You have successfully signed in as 
                   {% if user.profile.role == 'admin' %} 
@@ -33,7 +37,7 @@
                       <button type="submit">Go to Home Page</button>
                   </form>
               </div>
-          </div>
+          </div> -->
       {% else %}
           <div>
               <div id="g_id_onload"
