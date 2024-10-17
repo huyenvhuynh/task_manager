@@ -41,6 +41,7 @@ def add_assignment(request):
             except ValidationError as e:
                 return HttpResponseBadRequest('Invalid file type.')
     
+    # this creates an assignment with the data from the form
     assignment = Assignment(
         title=title,
         description=description,
@@ -48,5 +49,6 @@ def add_assignment(request):
         file_upload=file_upload,
         user=request.user
     )
+    # save assignment to database
     assignment.save()
     return redirect(next_url)
