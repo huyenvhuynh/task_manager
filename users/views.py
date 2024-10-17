@@ -108,6 +108,6 @@ def select_role(request):
 
 
 def sign_out(request):
-    del request.session['user_data']  
-    logout(request)  
+    request.session.pop('user_data', None)  # Safely remove 'user_data' if it exists
+    logout(request)
     return redirect('users:sign_in')
