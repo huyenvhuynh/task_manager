@@ -74,7 +74,7 @@ def auth_receiver(request):
         }
 
         if created:
-            return redirect('select_role')
+            return redirect('users:select_role')
         else:
             return redirect('users:sign_in')  # Redirect to sign_in view for both new and returning users
 
