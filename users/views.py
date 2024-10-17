@@ -113,6 +113,6 @@ def select_role(request):
 
 
 def sign_out(request):
-    del request.session['user_data']  
+    request.session.pop('user_data', None) 
     logout(request)  
     return redirect('sign_in')
