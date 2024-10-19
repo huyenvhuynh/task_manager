@@ -1,0 +1,35 @@
+<!-- templates/myapp/assignment_list.html -->
+{% extends 'myapp/base.html' %}
+
+
+{% block content %}
+<div class="container mt-5">
+    <h1>My Assignments</h1>
+    {% if assignments %}
+        <ul class="list-group">
+            {% for assignment in assignments %}
+                <li class="list-group-item">
+                    <h5>{{ assignment.title }}</h5>
+                    <p>{{ assignment.description }}</p>
+                    <p>Due Date: {{ assignment.due_date }}</p>
+                    <p>Uploaded At: {{ assignment.uploaded_at }}</p>
+                    {% if assignment.file_upload %}
+                        <p>File: <a href="{{ assignment.file_upload.url }}">{{ assignment.file_upload.name }}</a></p>
+                    {% else %}
+                        <p>No file uploaded.</p>
+                    {% endif %}
+                    <div>
+                        <a href="{% url 'myapp:edit_assignment' assignment.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                        <form action="{% url 'myapp:delete_assignment' assignment.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No assignments found.</p>
+    {% endif %}
+</div>
+{% endblock %}

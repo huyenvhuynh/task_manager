@@ -1,0 +1,30 @@
+{% extends 'myapp/base.html' %} {% block content %} {% load static %}
+<head>
+  <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+</head>
+
+<body>
+  <div class="absolute container mt-5">
+    <div class="absolute inset-0 justify-center">
+      <div class="bg-shape1 bg-teal opacity-50 bg-blur"></div>
+      <div class="bg-shape2 bg-primary opacity-50 bg-blur"></div>
+      <div class="bg-shape1 bg-purple opacity-50 bg-blur"></div>
+    </div>
+    <div>
+      <h1>
+        Welcome to <br />
+        Task Planner
+      </h1>
+      {% if user.is_authenticated %}
+      <div class="container glass">
+        <p>Your role: {{ user.profile.role }}</p>
+      </div>
+      <!-- Add your main content here -->
+      {% else %}
+      <p>Please sign in to access your tasks.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+
+{% endblock %}

@@ -14,12 +14,7 @@ def google_sign_in(request):
     return render(request, 'users/sign_in.html', {
         'google_client_id': os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
     })
-    
-def home(request):
-    if request.user.is_authenticated:
-        return render(request, 'users/home.html')
-    else:
-        return redirect('sign_in')
+
 
 def sign_in(request):
     if request.user.is_authenticated:
@@ -79,9 +74,9 @@ def auth_receiver(request):
         }
 
         if created:
-            return redirect('select_role')
+            return redirect('users:select_role')
         else:
-            return redirect('sign_in')  # Redirect to sign_in view for both new and returning users
+            return redirect('users:sign_in')  # Redirect to sign_in view for both new and returning users
 
     return HttpResponse('Invalid request method', status=405)
 
@@ -94,12 +89,19 @@ def select_role(request):
             request.user.profile.role = selected_role
             request.user.profile.save()
 
+            # Ensure 'user_data' exists in the session before updating it
+            if 'user_data' not in request.session:
+                request.session['user_data'] = {}
+
+            # Update the role
             request.session['user_data']['role'] = selected_role
 
-            if selected_role == 'admin':
-                message = "Successfully signed in as an Administrator!"
-            else:
-                message = "Successfully signed in as a Common User!"
+            # Determine based on the selected role
+            message = (
+                "Successfully signed in as an Administrator!"
+                if selected_role == 'admin'
+                else "Successfully signed in as a Common User!"
+            )
 
             return render(request, 'users/sign_in.html', {
                 'message': message,
@@ -113,6 +115,6 @@ def select_role(request):
 
 
 def sign_out(request):
-    request.session.pop('user_data', None) 
-    logout(request)  
-    return redirect('sign_in')
+    request.session.pop('user_data', None)  # Safely remove 'user_data' if it exists
+    logout(request)
+    return redirect('users:sign_in')
