@@ -89,12 +89,19 @@ def select_role(request):
             request.user.profile.role = selected_role
             request.user.profile.save()
 
+            # Ensure 'user_data' exists in the session before updating it
+            if 'user_data' not in request.session:
+                request.session['user_data'] = {}
+
+            # Update the role
             request.session['user_data']['role'] = selected_role
 
-            if selected_role == 'admin':
-                message = "Successfully signed in as an Administrator!"
-            else:
-                message = "Successfully signed in as a Common User!"
+            # Determine based on the selected role
+            message = (
+                "Successfully signed in as an Administrator!"
+                if selected_role == 'admin'
+                else "Successfully signed in as a Common User!"
+            )
 
             return render(request, 'users/sign_in.html', {
                 'message': message,
