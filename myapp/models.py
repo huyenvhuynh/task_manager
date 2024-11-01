@@ -17,6 +17,8 @@ class Assignment(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    keywords = models.CharField(max_length=255, blank=True, help_text="Comma-separated keywords")
+
 
     def __str__(self):
         return self.title

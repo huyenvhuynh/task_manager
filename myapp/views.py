@@ -25,6 +25,8 @@ def add_assignment(request):
         description = request.POST.get('description')
         due_date = request.POST.get('due_date')
         file_upload = request.FILES.get('file_upload')
+        keywords = request.POST.get('keywords')  # Retrieve keywords as comma-separated string
+
 
         # Verify the file extension
         if file_upload:
@@ -40,6 +42,7 @@ def add_assignment(request):
             description=description,
             due_date=due_date,
             file_upload=file_upload,
+            keywords=keywords,
             user=request.user
         )
         assignment.save()
@@ -51,6 +54,12 @@ def add_assignment(request):
 def assignment_list(request):
     # Fetch assignments belonging to the logged-in user
     assignments = Assignment.objects.filter(user=request.user)
+
+    # Split keywords for each assignment
+    for assignment in assignments:
+        if assignment.keywords:
+            assignment.keyword_list = assignment.keywords.split(",")  # Add a new attribute to store split keywords
+
     return render(request, 'myapp/assignment_list.html', {'assignments': assignments})
 
 @require_POST  
@@ -68,6 +77,7 @@ def edit_assignment(request, assignment_id):
         assignment.title = request.POST.get('title')
         assignment.description = request.POST.get('description')
         assignment.due_date = request.POST.get('due_date')
+        keywords = request.POST.get('keywords')
         file_upload = request.FILES.get('file_upload')
 
         if file_upload:
@@ -79,6 +89,7 @@ def edit_assignment(request, assignment_id):
             except ValidationError as e:
                 return HttpResponseBadRequest('Invalid file type.')
 
+        assignment.keywords = keywords
         assignment.save()
         return redirect('myapp:assignment_list')  
     else:
