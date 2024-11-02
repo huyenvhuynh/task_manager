@@ -2,12 +2,15 @@
 <div class="container mt-5">
   <h1>File Search</h1>
   {% if assignments %}
+  <!-- Search Bar -->
   <div class="d-flex justify-content-end mb-3">
     <form action="" method="get" class="input-group">
       <input type="text" name="q" class="form-control" placeholder="Search files..." value="{{ request.GET.q|default:'' }}">
       <button class="btn btn-primary" type="submit">Search</button>
     </form>
   </div>
+  <!-- List of Assignments -->
+  <!-- rest of the code is in assignment_list.html -->
   <ul class="list-group">
     {% for assignment in assignments %}
     <li class="list-group-item">
@@ -62,6 +65,7 @@
 </div>
 {% endblock %}
 
+<!-- Styling for keyword display -->
 <style>
   .keywords {
     margin-top: 10px;
