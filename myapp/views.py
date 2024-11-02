@@ -25,12 +25,13 @@ def add_assignment(request):
         description = request.POST.get('description')
         due_date = request.POST.get('due_date')
         file_upload = request.FILES.get('file_upload')
-        file_title = request.POST.get('file-title')
-        file_description = request.POST.get('file-description')
-        keywords = request.POST.get('keywords')  # Retrieve keywords as comma-separated string
+        
+        # Only get metadata if there's a file
+        file_title = request.POST.get('file-title') if file_upload else None
+        file_description = request.POST.get('file-description') if file_upload else None
+        keywords = request.POST.get('keywords') if file_upload else None
 
-
-        # Verify the file extension
+        # Verify the file extension if file exists
         if file_upload:
             validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
             try:

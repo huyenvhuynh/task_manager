@@ -17,10 +17,7 @@
           >{{ assignment.file_upload.name }}</a
         >
       </p>
-      {% else %}
-      <p>No file uploaded.</p>
-      {% endif %}
-
+      
       <!-- Displaying keywords -->
       {% if assignment.keywords %}
       <div class="keywords">
@@ -31,6 +28,9 @@
       </div>
       {% else %}
       <p>No keywords added.</p>
+      {% endif %}
+      {% else %}
+      <p>No file uploaded.</p>
       {% endif %}
 
       <div>
