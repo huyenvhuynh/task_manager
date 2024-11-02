@@ -266,7 +266,7 @@
       });
 
 
-      // this adds a keyword. might be good to refactor this to use the word keyword instead of tag; was confused about this at first. 
+      // this adds a keyword. might be good to refactor this to use the word keyword instead of tag; was confused about this at first.
       function addTag() {
         const input = document.getElementById("keywords-input");
         const tagsDisplay = document.getElementById("tagsDisplay");
@@ -303,7 +303,7 @@
           (tag) => tag.textContent.replace("×", "").trim()
         );
 
-        hiddenInput.value = tags.join(", ");
+        hiddenInput.value = tags.join(",");
       }
 
 
