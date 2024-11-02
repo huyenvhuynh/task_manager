@@ -43,6 +43,16 @@
         required
       />
     </div>
+    <div class="mb-3">
+      <label for="course" class="form-label">Course</label>
+      <select class="form-control" id="course" name="course" required>
+          {% for course in user.profile.courses.all %}
+              <option value="{{ course.id }}" {% if course.id == assignment.course.id %}selected{% endif %}>
+                  {{ course.full_name }}
+              </option>
+          {% endfor %}
+      </select>
+  </div>
 
     
     <!-- Adding keywords -->

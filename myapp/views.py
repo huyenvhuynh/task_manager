@@ -1,11 +1,13 @@
 # views.py
 import os
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
+
+from courses.models import Course
 from .models import Assignment
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
@@ -17,6 +19,7 @@ def home(request):
     else:
         return redirect('users:sign_in')
 
+# views.py
 @login_required
 def add_assignment(request):
     if request.method == 'POST':
@@ -25,13 +28,19 @@ def add_assignment(request):
         description = request.POST.get('description')
         due_date = request.POST.get('due_date')
         file_upload = request.FILES.get('file_upload')
-        
+        course_id = request.POST.get('course')  # Get course ID
+
+        # Validate that the selected course is one of the user's courses
+        try:
+            course = request.user.profile.courses.get(id=course_id)
+        except Course.DoesNotExist:
+            return HttpResponseBadRequest('Invalid course selected.')
+
         # Only get metadata if there's a file
         file_title = request.POST.get('file-title') if file_upload else None
         file_description = request.POST.get('file-description') if file_upload else None
         keywords = request.POST.get('keywords') if file_upload else None
 
-        # Verify the file extension if file exists
         if file_upload:
             validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
             try:
@@ -39,7 +48,6 @@ def add_assignment(request):
             except ValidationError as e:
                 return HttpResponseBadRequest('Invalid file type.')
 
-        # Create an assignment with the form data
         assignment = Assignment(
             title=title,
             description=description,
@@ -48,46 +56,69 @@ def add_assignment(request):
             file_title=file_title,
             file_description=file_description,
             keywords=keywords,
-            user=request.user
+            user=request.user,
+            course=course  # Use the validated course
         )
         assignment.save()
-        return redirect('myapp:assignment_list')  # Use namespaced URL
+        return redirect('myapp:assignment_list')
     else:
         return redirect('myapp:home')
 
 @login_required
 def assignment_list(request):
-    # Fetch assignments belonging to the logged-in user
-    assignments = Assignment.objects.filter(user=request.user)
+    # Get user's courses
+    user_courses = request.user.profile.courses.all()
+    # Fetch assignments from user's courses
+    assignments = Assignment.objects.filter(course__in=user_courses)
 
-    # Split keywords for each assignment
     for assignment in assignments:
         if assignment.keywords:
-            # Split on comma and strip whitespace from each keyword
             assignment.keyword_list = [k.strip() for k in assignment.keywords.split(",")]
 
-    return render(request, 'myapp/assignment_list.html', {'assignments': assignments})
+    return render(request, 'myapp/assignment_list.html', {
+        'assignments': assignments,
+        'courses': user_courses
+    })
 
 @require_POST  
 @login_required
 def delete_assignment(request, assignment_id):
-    assignment = get_object_or_404(Assignment, id=assignment_id, user=request.user)
-    assignment.delete()
+    # Check if user is in the course that owns this assignment
+    assignment = get_object_or_404(Assignment, 
+                                id=assignment_id, 
+                                course__in=request.user.profile.courses.all())
+    # Only allow creator to delete
+    if assignment.user == request.user:
+        assignment.delete()
     return redirect('myapp:assignment_list')
 
 @login_required
 def edit_assignment(request, assignment_id):
-    assignment = get_object_or_404(Assignment, id=assignment_id, user=request.user)
+    # Check if user is in the course that owns this assignment
+    assignment = get_object_or_404(Assignment, 
+                                id=assignment_id, 
+                                course__in=request.user.profile.courses.all())
+    # Only allow creator to edit
+    if assignment.user != request.user:
+        return HttpResponseForbidden("You can't edit this assignment")
+
     if request.method == 'POST':
-        # Update fields with new data
         assignment.title = request.POST.get('title')
         assignment.description = request.POST.get('description')
         assignment.due_date = request.POST.get('due_date')
         keywords = request.POST.get('keywords')
         file_upload = request.FILES.get('file_upload')
+        
+        # Allow changing course if provided
+        course_id = request.POST.get('course')
+        if course_id:
+            try:
+                course = Course.objects.get(id=course_id)
+                assignment.course = course
+            except Course.DoesNotExist:
+                return HttpResponseBadRequest('Invalid course.')
 
         if file_upload:
-            # Validate the new file
             validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
             try:
                 validator(file_upload)
@@ -99,32 +130,34 @@ def edit_assignment(request, assignment_id):
         assignment.save()
         return redirect('myapp:assignment_list')  
     else:
-        return render(request, 'myapp/edit_assignment.html', {'assignment': assignment})
-    
+        user_courses = request.user.profile.courses.all()
+        return render(request, 'myapp/edit_assignment.html', {
+            'assignment': assignment,
+            'courses': user_courses
+        })
 
 @login_required
 def file_search(request):
-    # Get search query from 
     search_query = request.GET.get('q', '').strip().lower()
     
-    # Fetch assignments belonging to the logged-in user
-    assignments = Assignment.objects.filter(user=request.user)
+    # Get user's courses and their assignments
+    user_courses = request.user.profile.courses.all()
+    assignments = Assignment.objects.filter(course__in=user_courses)
 
-    # Filter assignments if there's a search query
     if search_query:
         filtered_assignments = []
         for assignment in assignments:
             if assignment.keywords:
-                # Split on comma and strip whitespace from each keyword
                 keywords = [k.strip().lower() for k in assignment.keywords.split(",")]
                 if any(search_query in keyword for keyword in keywords):
                     filtered_assignments.append(assignment)
         assignments = filtered_assignments
 
-    # Split keywords for each assignment
     for assignment in assignments:
         if assignment.keywords:
-            # Split on comma and strip whitespace from each keyword
             assignment.keyword_list = [k.strip() for k in assignment.keywords.split(",")]
 
-    return render(request, 'myapp/file_search.html', {'assignments': assignments})
+    return render(request, 'myapp/file_search.html', {
+        'assignments': assignments,
+        'courses': user_courses
+    })

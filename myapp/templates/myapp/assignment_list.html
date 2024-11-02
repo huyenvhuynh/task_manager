@@ -1,74 +1,91 @@
 <!-- templates/myapp/assignment_list.html -->
-{% extends 'myapp/base.html' %} {% block content %}
+{% extends 'myapp/base.html' %} 
+
+{% block content %}
 <div class="container mt-5">
   <h1>My Assignments</h1>
+
   {% if assignments %}
   <ul class="list-group">
-    {% for assignment in assignments %}
-    <li class="list-group-item">
-      <h5>{{ assignment.title }}</h5>
-      <p>{{ assignment.description }}</p>
-      <p>Due Date: {{ assignment.due_date }}</p>
-      <p>Uploaded At: {{ assignment.uploaded_at }}</p>
-      {% if assignment.file_upload %}
-      <p>
-        File:
-        <a href="{{ assignment.file_upload.url }}"
-          >{{ assignment.file_upload.name }}</a
-        >
-      </p>
-      
-      <!-- Displaying keywords -->
-      {% if assignment.keywords %}
-      <div class="keywords">
-        <strong>Keywords:</strong>
-        {% for keyword in assignment.keyword_list %}
-        <span class="keyword-tag">{{ keyword }}</span>
-        {% endfor %}
-      </div>
-      {% else %}
-      <p>No keywords added.</p>
-      {% endif %}
-      {% else %}
-      <p>No file uploaded.</p>
-      {% endif %}
+      {% for assignment in assignments %}
+      <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+              <h5>{{ assignment.title }}</h5>
+              <span class="badge bg-primary">{{ assignment.course.full_name }}</span>
+          </div>
+          <p>{{ assignment.description }}</p>
+          <p>Due Date: {{ assignment.due_date }}</p>
+          <p>Uploaded At: {{ assignment.uploaded_at }}</p>
+          
+          {% if assignment.file_upload %}
+          <p>
+              File:
+              <a href="{{ assignment.file_upload.url }}">{{ assignment.file_upload.name }}</a>
+          </p>
+          
+          {% if assignment.keywords %}
+          <div class="keywords">
+              <strong>Keywords:</strong>
+              {% for keyword in assignment.keyword_list %}
+              <span class="keyword-tag">{{ keyword }}</span>
+              {% endfor %}
+          </div>
+          {% else %}
+          <p>No keywords added.</p>
+          {% endif %}
+          {% else %}
+          <p>No file uploaded.</p>
+          {% endif %}
 
-      <div>
-        <a
-          href="{% url 'myapp:edit_assignment' assignment.id %}"
-          class="btn btn-secondary btn-sm"
-          >View and Edit</a
-        >
-        <form
-          action="{% url 'myapp:delete_assignment' assignment.id %}"
-          method="post"
-          style="display: inline"
-        >
-          {% csrf_token %}
-          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-        </form>
-      </div>
-    </li>
-    {% endfor %}
+          <div>
+              <a href="{% url 'myapp:edit_assignment' assignment.id %}"
+                  class="btn btn-secondary btn-sm">View and Edit</a>
+              {% if assignment.user == user %}  <!-- Only show delete to creator -->
+              <form action="{% url 'myapp:delete_assignment' assignment.id %}"
+                    method="post"
+                    style="display: inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+              {% endif %}
+          </div>
+      </li>
+      {% endfor %}
   </ul>
   {% else %}
   <p>No assignments found.</p>
   {% endif %}
 </div>
-{% endblock %}
 
 <style>
-  .keywords {
-    margin-top: 10px;
-  }
+.keywords {
+  margin-top: 10px;
+}
 
-  .keyword-tag {
-    background-color: #e0e0e0;
-    color: #333;
-    padding: 5px 10px;
-    border-radius: 5px;
-    display: inline-block;
-    margin-right: 5px;
-    font-size: 0.85em;
-  }
+.keyword-tag {
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 5px 10px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 0.85em;
+}
+
+/* Add some styling for the course badge */
+.badge {
+  font-size: 0.9em;
+  padding: 8px 12px;
+}
+
+/* Improve spacing in list items */
+.list-group-item {
+  margin-bottom: 10px;
+}
+
+/* Add some margin to the actions div */
+.list-group-item > div:last-child {
+  margin-top: 15px;
+}
 </style>
+{% endblock %}

@@ -45,84 +45,85 @@
     </style>
   </head>
   <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <div class="container-fluid">
-        <!-- Add Assignment Button -->
-        {% if user.is_authenticated and user.profile.role == 'user' %}
-        <button
-          class="btn btn-primary me-2"
-          type="button"
-          data-bs-toggle="modal"
-          data-bs-target="#addAssignmentModal"
-        >
-          Add Assignment
-        </button>
-        {% endif %}
-        <!-- Navbar Toggler for Mobile View -->
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <!-- Navbar Links -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav mx-auto">
-            {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'myapp:home' %}">Home</a>
-            </li>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <!-- Add Assignment Button -->
+      {% if user.is_authenticated and user.profile.role == 'user' %}
+      <button
+        class="btn btn-primary me-2"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#addAssignmentModal"
+      >
+        Add Assignment
+      </button>
+      {% endif %}
+      <!-- Navbar Toggler for Mobile View -->
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <!-- Navbar Links -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'myapp:home' %}">Home</a>
+          </li>
 
-            <!-- Links just for normal users -->
-            {% if user.profile.role == 'user' %}
+          <!-- Links for normal users -->
+          {% if user.profile.role == 'user' %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'courses:course_list' %}">Courses</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'myapp:assignment_list' %}">My Assignments</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Calendar</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'myapp:file_search' %}">Search</a>
+          </li>
+          {% endif %}
 
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'myapp:assignment_list' %}"
-                >My Assignments</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Calendar</a>
-            </li>
-            <li class="nav-item"></li>
-              <a class="nav-link" href="{% url 'myapp:file_search' %}">Search</a>
-            </li>
+          <!-- Links for admin users -->
+          {% elif user.profile.role == 'admin' %}
+          <li class="nav-item">
+            <a class="nav-link" href="#">Students</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Assignments</a>
+          </li>
+          {% endif %}
+        </ul>
 
-            <!-- Links just for admin users -->
-            {% elif user.profile.role == 'admin' %}
-            <li class="nav-item">
-              <a class="nav-link" href="#">Students</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Assignments</a>
-            </li>
-            {% endif %} {% endif %}
-          </ul>
-
-          <!-- Sign in / Sign out -->
-          <ul class="navbar-nav">
-            {% if user.is_authenticated %}
-            <li class="nav-item">
-              <span class="nav-link">Hello, {{ user.get_full_name }}!</span>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
-            </li>
-            {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:sign_in' %}">Sign In</a>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
+        <!-- Right-aligned nav items -->
+        <ul class="navbar-nav ms-auto">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <span class="nav-link">Hello, {{ user.get_full_name }}!</span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:sign_in' %}">Sign In</a>
+          </li>
+          {% endif %}
+        </ul>
       </div>
-    </nav>
+    </div>
+  </nav>
 
     <!-- Main Content Area -->
     <div class="container mt-5">{% block content %} {% endblock %}</div>
@@ -189,6 +190,15 @@
                   required
                 />
               </div>
+              <div class="mb-3">
+                <label for="course" class="form-label">Course</label>
+                <select class="form-control" id="course" name="course" required>
+                    {% for course in user.profile.courses.all %}
+                        <option value="{{ course.id }}">{{ course.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
               <div class="mb-3">
                 <label for="file_upload" class="form-label">Upload File</label>
                 <input

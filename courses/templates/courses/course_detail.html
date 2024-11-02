@@ -1,0 +1,29 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-8">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ course.full_name }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Course Name:</strong></p>
+                    <p class="text-muted">{{ course.course_name }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Course Number:</strong></p>
+                    <p class="text-muted">{{ course.course_number }}</p>
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">Back to Courses</a>
+                <a href="{% url 'courses:create_course' %}" class="btn btn-primary">Create Another Course</a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
