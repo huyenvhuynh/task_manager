@@ -23,6 +23,24 @@
       body {
         font-family: "Raleway", sans-serif;
       }
+      
+      .tag-delete {
+        color: white;
+        background-color: red;
+        cursor: pointer;
+        padding: 0 4px;
+        margin-left: 4px;
+        border-radius: 3px;
+        font-size: 12px;
+      }
+
+      /* Add new style for tags */
+      .tag {
+        display: inline-block;
+        margin-right: 8px;  /* Space between tags */
+        margin-bottom: 4px;
+      }
+      
     </style>
   </head>
   <body>
@@ -174,12 +192,29 @@
               <!-- Keywords Input -->
               <div class="mb-3">
                 <div class="d-flex align-items-center mb-2">
-                  <!-- <label for="keywords" class="form-label mb-0 me-2">Keywords</label> -->
                   <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleKeywords()">
                     <span id="keywordsToggleIcon">Add File Meta Data ▼</span>
                   </button>
                 </div>
-                <div id="keywordsContainer" style="display: block;">
+                <div id="keywordsContainer" style="display: none;">
+                  <div class="mb-2">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="file_title"
+                      name="file-title"
+                      placeholder="File Title"
+                    />
+                  </div>
+                  <div class="mb-2">
+                    <textarea
+                      class="form-control"
+                      id="file_description"
+                      name="file-description"
+                      rows="2"
+                      placeholder="File Description"
+                    ></textarea>
+                  </div>
                   <div class="tags-input-container d-flex">
                     <input
                       type="text"
@@ -191,7 +226,7 @@
                       Add
                     </button>
                   </div>
-                  <div id="tagsDisplay" class="tags-display"></div>
+                  <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
                   <input type="hidden" name="keywords" id="keywords" />
                 </div>
               </div>
@@ -207,7 +242,13 @@
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- quickly reload the page when the modal is closed to clear unsubmitted form input -->
     <script>
+      document.getElementById('addAssignmentModal').addEventListener('hidden.bs.modal', function () {
+        window.location.reload();
+      });
+
+
       function addTag() {
         const input = document.getElementById("keywords-input");
         const tagsDisplay = document.getElementById("tagsDisplay");
@@ -221,7 +262,7 @@
 
           const deleteButton = document.createElement("span");
           deleteButton.className = "tag-delete";
-          deleteButton.textContent = " ";
+          deleteButton.textContent = "×";
           deleteButton.onclick = function () {
             tagsDisplay.removeChild(tagElement);
             updateHiddenInput();
@@ -240,12 +281,14 @@
         const hiddenInput = document.getElementById("keywords");
 
         let tags = Array.from(tagsDisplay.getElementsByClassName("tag")).map(
-          (tag) => tag.textContent.replace(" x", "").trim()
+          (tag) => tag.textContent.replace("×", "").trim()
         );
 
         hiddenInput.value = tags.join(",");
       }
 
+
+      // this opens and closes the "add file meta data" section
       function toggleKeywords() {
         const keywordsContainer = document.getElementById("keywordsContainer");
         const keywordsToggleIcon = document.getElementById("keywordsToggleIcon");

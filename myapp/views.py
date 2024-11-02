@@ -25,6 +25,8 @@ def add_assignment(request):
         description = request.POST.get('description')
         due_date = request.POST.get('due_date')
         file_upload = request.FILES.get('file_upload')
+        file_title = request.POST.get('file-title')
+        file_description = request.POST.get('file-description')
         keywords = request.POST.get('keywords')  # Retrieve keywords as comma-separated string
 
 
@@ -42,6 +44,8 @@ def add_assignment(request):
             description=description,
             due_date=due_date,
             file_upload=file_upload,
+            file_title=file_title,
+            file_description=file_description,
             keywords=keywords,
             user=request.user
         )
