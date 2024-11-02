@@ -173,18 +173,25 @@
 
               <!-- Keywords Input -->
               <div class="mb-3">
-                <label for="keywords" class="form-label">Keywords</label>
-                <div class="tags-input-container">
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="keywords-input"
-                    placeholder="Add a keyword and press comma"
-                    onkeydown="addTag(event)"
-                  />
+                <div class="d-flex align-items-center mb-2">
+                  <!-- <label for="keywords" class="form-label mb-0 me-2">Keywords</label> -->
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleKeywords()">
+                    <span id="keywordsToggleIcon">Add File Meta Data ▼</span>
+                  </button>
                 </div>
-                <div id="tagsDisplay" class="tags-display"></div>
-                <input type="hidden" name="keywords" id="keywords" />
+                <div id="keywordsContainer" style="display: block;">
+                  <div class="tags-input-container">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="keywords-input"
+                      placeholder="Add a keyword and press comma"
+                      onkeydown="addTag(event)"
+                    />
+                  </div>
+                  <div id="tagsDisplay" class="tags-display"></div>
+                  <input type="hidden" name="keywords" id="keywords" />
+                </div>
               </div>
 
               <button type="submit" class="btn btn-primary">Add</button>
@@ -238,6 +245,19 @@
         );
 
         hiddenInput.value = tags.join(",");
+      }
+
+      function toggleKeywords() {
+        const keywordsContainer = document.getElementById("keywordsContainer");
+        const keywordsToggleIcon = document.getElementById("keywordsToggleIcon");
+
+        if (keywordsContainer.style.display === "none") {
+          keywordsContainer.style.display = "block";
+          keywordsToggleIcon.textContent = "Add File Meta Data ▲";
+        } else {
+          keywordsContainer.style.display = "none";
+          keywordsToggleIcon.textContent = "Add File Meta Data ▼";
+        }
       }
     </script>
   </body>
