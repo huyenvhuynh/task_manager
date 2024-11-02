@@ -3,12 +3,10 @@
   <h1>File Search</h1>
   {% if assignments %}
   <div class="d-flex justify-content-end mb-3">
-    <div class="input-group">
-      <input type="text" class="form-control" placeholder="Search files..." id="searchInput">
-      <button class="btn btn-primary" type="button" id="searchButton">
-        Search
-      </button>
-    </div>
+    <form action="" method="get" class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search files..." value="{{ request.GET.q|default:'' }}">
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
   </div>
   <ul class="list-group">
     {% for assignment in assignments %}

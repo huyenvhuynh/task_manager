@@ -103,8 +103,21 @@ def edit_assignment(request, assignment_id):
 
 @login_required
 def file_search(request):
+    # Get search query from 
+    search_query = request.GET.get('q', '').strip().lower()
+    
     # Fetch assignments belonging to the logged-in user
     assignments = Assignment.objects.filter(user=request.user)
+
+    # Filter assignments if there's a search query
+    if search_query:
+        filtered_assignments = []
+        for assignment in assignments:
+            if assignment.keywords:
+                keywords = [k.strip().lower() for k in assignment.keywords.split(',')]
+                if any(search_query in keyword for keyword in keywords):
+                    filtered_assignments.append(assignment)
+        assignments = filtered_assignments
 
     # Split keywords for each assignment
     for assignment in assignments:
