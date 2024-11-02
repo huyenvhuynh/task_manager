@@ -99,3 +99,16 @@ def edit_assignment(request, assignment_id):
         return redirect('myapp:assignment_list')  
     else:
         return render(request, 'myapp/edit_assignment.html', {'assignment': assignment})
+    
+
+@login_required
+def file_search(request):
+    # Fetch assignments belonging to the logged-in user
+    assignments = Assignment.objects.filter(user=request.user)
+
+    # Split keywords for each assignment
+    for assignment in assignments:
+        if assignment.keywords:
+            assignment.keyword_list = assignment.keywords.split(",")  # Add a new attribute to store split keywords
+
+    return render(request, 'myapp/file_search.html', {'assignments': assignments})

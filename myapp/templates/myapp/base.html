@@ -87,6 +87,9 @@
             <li class="nav-item">
               <a class="nav-link" href="#">Calendar</a>
             </li>
+            <li class="nav-item"></li>
+              <a class="nav-link" href="{% url 'myapp:file_search' %}">Search</a>
+            </li>
             {% elif user.profile.role == 'admin' %}
             <li class="nav-item">
               <a class="nav-link" href="#">Students</a>
