@@ -44,6 +44,7 @@
       />
     </div>
 
+    
     <!-- Adding keywords -->
     <!-- <div class="mb-3">
       <label for="keywords" class="form-label">Keywords</label>
@@ -74,7 +75,7 @@
         >
       </p>
     </div>
-    {% endif %}
+
     <div class="mb-3">
       <label for="file_upload" class="form-label">Replace File</label>
       <input
@@ -84,6 +85,22 @@
         name="file_upload"
       />
     </div>
+
+      <!-- File Metadata section -->
+      <div class="mb-3">
+        <h4>File Metadata</h4>
+        {% if assignment.file_title %}
+          <p>Title: {{ assignment.file_title }}</p>
+        {% endif %}
+        {% if assignment.file_description %}
+          <p>Description: {{ assignment.file_description }}</p>
+        {% endif %}
+        {% if assignment.keywords %}
+          <p>Keywords: {{ assignment.keywords }}</p>
+        {% endif %}
+      </div>
+      {% endif %}
+
     <button type="submit" class="btn btn-primary">Save Changes</button>
   </form>
   <a href="{% url 'myapp:assignment_list' %}" class="btn btn-secondary mt-3"

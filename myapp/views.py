@@ -63,7 +63,7 @@ def assignment_list(request):
     # Split keywords for each assignment
     for assignment in assignments:
         if assignment.keywords:
-            assignment.keyword_list = assignment.keywords.split(",")  # Add a new attribute to store split keywords
+            assignment.keyword_list = assignment.keywords.split(", ")  # Add a new attribute to store split keywords
 
     return render(request, 'myapp/assignment_list.html', {'assignments': assignments})
 
@@ -114,7 +114,7 @@ def file_search(request):
         filtered_assignments = []
         for assignment in assignments:
             if assignment.keywords:
-                keywords = [k.strip().lower() for k in assignment.keywords.split(',')]
+                keywords = [k.strip().lower() for k in assignment.keywords.split(', ')]
                 if any(search_query in keyword for keyword in keywords):
                     filtered_assignments.append(assignment)
         assignments = filtered_assignments
@@ -122,6 +122,6 @@ def file_search(request):
     # Split keywords for each assignment
     for assignment in assignments:
         if assignment.keywords:
-            assignment.keyword_list = assignment.keywords.split(",")  # Add a new attribute to store split keywords
+            assignment.keyword_list = assignment.keywords.split(", ")  # Add a new attribute to store split keywords
 
     return render(request, 'myapp/file_search.html', {'assignments': assignments})
