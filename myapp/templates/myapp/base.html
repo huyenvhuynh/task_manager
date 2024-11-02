@@ -205,7 +205,9 @@
                     <span id="keywordsToggleIcon">Add File Meta Data ▼</span>
                   </button>
                 </div>
+                <!-- Metadata section container-->
                 <div id="metadataContainer" style="display: none;">
+                  <!-- File Title -->
                   <div class="mb-2">
                     <input
                       type="text"
@@ -215,6 +217,7 @@
                       placeholder="File Title"
                     />
                   </div>
+                  <!-- File Description -->
                   <div class="mb-2">
                     <textarea
                       class="form-control"
@@ -224,6 +227,7 @@
                       placeholder="File Description"
                     ></textarea>
                   </div>
+                  <!-- Keywords -->
                   <div class="tags-input-container d-flex">
                     <input
                       type="text"
@@ -231,11 +235,14 @@
                       id="keywords-input"
                       placeholder="Add Keyword"
                     />
+                    <!-- Add Keyword Button -->
                     <button type="button" class="btn btn-sm btn-primary" onclick="addTag()">
                       Add
                     </button>
                   </div>
+                  <!-- Display of Keywords -->
                   <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
+                  <!-- Hidden Input for Keywords -->
                   <input type="hidden" name="keywords" id="keywords" />
                 </div>
               </div>
@@ -286,6 +293,7 @@
         }
       }
 
+      // this updates the list of keywords that will be saved to the database? jessica could you confirm this?
       function updateHiddenInput() {
         const tagsDisplay = document.getElementById("tagsDisplay");
         const hiddenInput = document.getElementById("keywords");
