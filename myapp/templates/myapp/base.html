@@ -77,6 +77,8 @@
             <li class="nav-item">
               <a class="nav-link" href="{% url 'myapp:home' %}">Home</a>
             </li>
+
+            <!-- Links just for normal users -->
             {% if user.profile.role == 'user' %}
 
             <li class="nav-item">
@@ -90,6 +92,8 @@
             <li class="nav-item"></li>
               <a class="nav-link" href="{% url 'myapp:file_search' %}">Search</a>
             </li>
+
+            <!-- Links just for admin users -->
             {% elif user.profile.role == 'admin' %}
             <li class="nav-item">
               <a class="nav-link" href="#">Students</a>
@@ -99,6 +103,8 @@
             </li>
             {% endif %} {% endif %}
           </ul>
+
+          <!-- Sign in / Sign out -->
           <ul class="navbar-nav">
             {% if user.is_authenticated %}
             <li class="nav-item">
@@ -192,14 +198,14 @@
                 />
               </div>
 
-              <!-- Keywords Input -->
+              <!-- File Meta Data Section -->
               <div class="mb-3">
                 <div class="d-flex align-items-center mb-2">
-                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleKeywords()">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleMetaDataSection()">
                     <span id="keywordsToggleIcon">Add File Meta Data ▼</span>
                   </button>
                 </div>
-                <div id="keywordsContainer" style="display: none;">
+                <div id="metadataContainer" style="display: none;">
                   <div class="mb-2">
                     <input
                       type="text"
@@ -252,6 +258,7 @@
       });
 
 
+      // this adds a keyword
       function addTag() {
         const input = document.getElementById("keywords-input");
         const tagsDisplay = document.getElementById("tagsDisplay");
@@ -291,16 +298,16 @@
       }
 
 
-      // this opens and closes the "add file meta data" section
-      function toggleKeywords() {
-        const keywordsContainer = document.getElementById("keywordsContainer");
+      // this opens and closes the "add file metadata" section
+      function toggleMetaDataSection() {
+        const metadataContainer = document.getElementById("metadataContainer");
         const keywordsToggleIcon = document.getElementById("keywordsToggleIcon");
 
-        if (keywordsContainer.style.display === "none") {
-          keywordsContainer.style.display = "block";
+        if (metadataContainer.style.display === "none") {
+          metadataContainer.style.display = "block";
           keywordsToggleIcon.textContent = "Add File Meta Data ▲";
         } else {
-          keywordsContainer.style.display = "none";
+          metadataContainer.style.display = "none";
           keywordsToggleIcon.textContent = "Add File Meta Data ▼";
         }
       }
