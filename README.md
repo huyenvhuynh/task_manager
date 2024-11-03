@@ -9,3 +9,5 @@ __Computing ID:__
 Command to install requirements: pip install -r requirements.txt   
 
 Command to run server: python manage.py runserver
+
+Command to make migrations: python manage.py migrate

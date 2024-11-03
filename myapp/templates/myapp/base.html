@@ -2,124 +2,334 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     {% block title %}
     <title>Task Planner</title>
     {% endblock %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <!-- Custom Styles -->
     <style>
-        body {
-            font-family: 'Raleway', sans-serif;
-        }
+      body {
+        font-family: "Raleway", sans-serif;
+      }
+      
+      /* this is the red delete button next to the keyword */
+      .tag-delete {
+        color: white;
+        background-color: red;
+        cursor: pointer;
+        padding: 0 4px;
+        margin-left: 4px;
+        border-radius: 3px;
+        font-size: 12px;
+      }
+
+      /* Add new style for keyword */
+      .tag {
+        display: inline-block;
+        margin-right: 8px;  /* Space between keyword */
+        margin-bottom: 4px;
+      }
+      
     </style>
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <!-- Add Assignment Button -->
-            {% if user.is_authenticated and user.profile.role == 'user' %}
-                <button class="btn btn-primary me-2" type="button" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">Add Assignment</button>
-            {% endif %}
-            <!-- Navbar Toggler for Mobile View -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <!-- Navbar Links -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    {% if user.is_authenticated %}
-                        <li class= "nav-item">
-                                <a class="nav-link" href="{% url 'myapp:home' %}">Home</a>
-                            </li>
-                        {% if user.profile.role == 'user' %}
-                            
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'myapp:assignment_list' %}">My Assignments</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Calendar</a>
-                            </li>
-                        {% elif user.profile.role == 'admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Students</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Assignments</a>
-                            </li>
-                        {% endif %}
-                    {% endif %}
-                </ul>
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <span class="nav-link">Hello, {{ user.get_full_name }}!</span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'users:sign_in' %}">Sign In</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+  </head>
+  <body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <!-- Add Assignment Button -->
+      {% if user.is_authenticated and user.profile.role == 'user' %}
+      <button
+        class="btn btn-primary me-2"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#addAssignmentModal"
+      >
+        Add Assignment
+      </button>
+      {% endif %}
+      <!-- Navbar Toggler for Mobile View -->
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <!-- Navbar Links -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'myapp:home' %}">Home</a>
+          </li>
+
+          <!-- Links for normal users -->
+          {% if user.profile.role == 'user' %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'courses:course_list' %}">Courses</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'myapp:assignment_list' %}">My Assignments</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Calendar</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'myapp:file_search' %}">Search</a>
+          </li>
+          {% endif %}
+
+          <!-- Links for admin users -->
+          {% elif user.profile.role == 'admin' %}
+          <li class="nav-item">
+            <a class="nav-link" href="#">Students</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Assignments</a>
+          </li>
+          {% endif %}
+        </ul>
+
+        <!-- Right-aligned nav items -->
+        <ul class="navbar-nav ms-auto">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <span class="nav-link">Hello, {{ user.get_full_name }}!</span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:sign_in' %}">Sign In</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
 
     <!-- Main Content Area -->
-    <div class="container mt-5">
-        {% block content %}
-        {% endblock %}
-    </div>
+    <div class="container mt-5">{% block content %} {% endblock %}</div>
 
     <!-- Add Assignment Modal -->
     {% if user.is_authenticated and user.profile.role == 'user' %}
-    <div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addAssignmentModalLabel">New Assignment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <!-- Modal Body with Form -->
-                <div class="modal-body">
-                    <form action="{% url 'myapp:add_assignment' %}" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ request.path }}">
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="title" name="title" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="due_date" class="form-label">Due Date</label>
-                            <input type="date" class="form-control" id="due_date" name="due_date" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="file_upload" class="form-label">Upload File</label>
-                            <input type="file" class="form-control" id="file_upload" name="file_upload">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add</button>
-                    </form>
-                </div>
+    <div
+      class="modal fade"
+      id="addAssignmentModal"
+      tabindex="-1"
+      aria-labelledby="addAssignmentModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h5 class="modal-title" id="addAssignmentModalLabel">
+              New Assignment
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <!-- Modal Body with Form -->
+          <div class="modal-body">
+            <form
+              action="{% url 'myapp:add_assignment' %}"
+              method="post"
+              enctype="multipart/form-data"
+            >
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}" />
+              <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="title"
+                  name="title"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea
+                  class="form-control"
+                  id="description"
+                  name="description"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="due_date" class="form-label">Due Date</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="due_date"
+                  name="due_date"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="course" class="form-label">Course</label>
+                <select class="form-control" id="course" name="course" required>
+                    {% for course in user.profile.courses.all %}
+                        <option value="{{ course.id }}">{{ course.full_name }}</option>
+                    {% endfor %}
+                </select>
             </div>
+
+              <div class="mb-3">
+                <label for="file_upload" class="form-label">Upload File</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="file_upload"
+                  name="file_upload"
+                />
+              </div>
+
+              <!-- File Meta Data Section -->
+              <div class="mb-3">
+                <div class="d-flex align-items-center mb-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleMetaDataSection()">
+                    <span id="keywordsToggleIcon">Add File Meta Data ▼</span>
+                  </button>
+                </div>
+                <!-- Metadata section container-->
+                <div id="metadataContainer" style="display: none;">
+                  <!-- File Title -->
+                  <div class="mb-2">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="file_title"
+                      name="file-title"
+                      placeholder="File Title"
+                    />
+                  </div>
+                  <!-- File Description -->
+                  <div class="mb-2">
+                    <textarea
+                      class="form-control"
+                      id="file_description"
+                      name="file-description"
+                      rows="2"
+                      placeholder="File Description"
+                    ></textarea>
+                  </div>
+                  <!-- Keywords -->
+                  <div class="tags-input-container d-flex">
+                    <input
+                      type="text"
+                      class="form-control me-2"
+                      id="keywords-input"
+                      placeholder="Add Keyword"
+                    />
+                    <!-- Add Keyword Button -->
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addTag()">
+                      Add
+                    </button>
+                  </div>
+                  <!-- Display of Keywords -->
+                  <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
+                  <!-- Hidden Input for Keywords -->
+                  <input type="hidden" name="keywords" id="keywords" />
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">Add</button>
+            </form>
+          </div>
         </div>
+      </div>
     </div>
     {% endif %}
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+
+    <!-- quickly reload the page when the modal is closed to clear unsubmitted form input -->
+    <script>
+      document.getElementById('addAssignmentModal').addEventListener('hidden.bs.modal', function () {
+        window.location.reload();
+      });
+
+
+      // this adds a keyword. might be good to refactor this to use the word keyword instead of tag; was confused about this at first.
+      function addTag() {
+        const input = document.getElementById("keywords-input");
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+
+        let tag = input.value.trim();
+        if (tag) {
+          const tagElement = document.createElement("span");
+          tagElement.className = "tag";
+          tagElement.textContent = tag;
+
+          const deleteButton = document.createElement("span");
+          deleteButton.className = "tag-delete";
+          deleteButton.textContent = "×";
+          deleteButton.onclick = function () {
+            tagsDisplay.removeChild(tagElement);
+            updateHiddenInput();
+          };
+
+          tagElement.appendChild(deleteButton);
+          tagsDisplay.appendChild(tagElement);
+
+          input.value = "";
+          updateHiddenInput();
+        }
+      }
+
+      // this updates the list of keywords that will be saved to the database? jessica could you confirm this?
+      function updateHiddenInput() {
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+
+        let tags = Array.from(tagsDisplay.getElementsByClassName("tag")).map(
+          (tag) => tag.textContent.replace("×", "").trim()
+        );
+
+        hiddenInput.value = tags.join(",");
+      }
+
+
+      // this opens and closes the "add file metadata" section
+      function toggleMetaDataSection() {
+        const metadataContainer = document.getElementById("metadataContainer");
+        const keywordsToggleIcon = document.getElementById("keywordsToggleIcon");
+
+        if (metadataContainer.style.display === "none") {
+          metadataContainer.style.display = "block";
+          keywordsToggleIcon.textContent = "Add File Meta Data ▲";
+        } else {
+          metadataContainer.style.display = "none";
+          keywordsToggleIcon.textContent = "Add File Meta Data ▼";
+        }
+      }
+    </script>
+  </body>
 </html>

@@ -8,6 +8,11 @@ User = get_user_model()
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance, role='user')  
+        # Create a profile for new users
+        Profile.objects.create(user=instance, role='user')
     else:
-        instance.profile.save()
+        # Check if the user has a profile; if not, create one
+        if not hasattr(instance, 'profile'):
+            Profile.objects.create(user=instance, role='user')
+        else:
+            instance.profile.save()
