@@ -74,7 +74,7 @@ class AssignmentTests(TestCase):
     def test_assignment_list(self):
         # Testing that assignment_list view returns assignments for the logged-in user.
 
-        course = Course.objects.create(name='CS 2130')
+        course = Course.objects.create(course_number=2130, course_name='CSO1')
         
         Assignment.objects.create(
             title='Existing Assignment',
@@ -90,7 +90,7 @@ class AssignmentTests(TestCase):
 
     def test_delete_assignment(self):
         # Testing that delete_assignment removes an assignment.
-        course = Course.objects.create(name='CS 2130')
+        course = Course.objects.create(course_number=2130, course_name='CSO1')
         
         assignment = Assignment.objects.create(
             title='Assignment to Delete',
