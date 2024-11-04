@@ -73,12 +73,15 @@ class AssignmentTests(TestCase):
 
     def test_assignment_list(self):
         # Testing that assignment_list view returns assignments for the logged-in user.
+
+        course = Course.objects.create(name='CS 2130')
+        
         Assignment.objects.create(
             title='Existing Assignment',
             description='This is an existing assignment.',
             due_date='2024-12-31',
             user=self.user,
-            course='cs2130'
+            course=course
         )
         response = self.client.get(reverse('myapp:assignment_list'))
         self.assertEqual(response.status_code, 200)
@@ -87,12 +90,14 @@ class AssignmentTests(TestCase):
 
     def test_delete_assignment(self):
         # Testing that delete_assignment removes an assignment.
+        course = Course.objects.create(name='CS 2130')
+        
         assignment = Assignment.objects.create(
             title='Assignment to Delete',
             description='This assignment will be deleted.',
             due_date='2024-12-31',
             user=self.user,
-            course='cs2130'
+            course=course
         )
         response = self.client.post(reverse('myapp:delete_assignment', args=[assignment.id]))
         self.assertEqual(response.status_code, 302)
