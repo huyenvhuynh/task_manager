@@ -77,7 +77,7 @@ class AssignmentTests(TestCase):
             title='Existing Assignment',
             description='This is an existing assignment.',
             due_date='2024-12-31',
-            user=self.user
+            user=self.user,
             course='cs2130'
         )
         response = self.client.get(reverse('myapp:assignment_list'))
@@ -91,7 +91,7 @@ class AssignmentTests(TestCase):
             title='Assignment to Delete',
             description='This assignment will be deleted.',
             due_date='2024-12-31',
-            user=self.user
+            user=self.user,
             course='cs2130'
         )
         response = self.client.post(reverse('myapp:delete_assignment', args=[assignment.id]))
