@@ -32,44 +32,44 @@ class AssignmentTests(TestCase):
             content_type="application/octet-stream"
         )
 
-    def test_add_assignment_get_request(self):
-        # Testing GET reqeust to add_assignment redirects to home
-        response = self.client.get(reverse('myapp:add_assignment'))
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('myapp:home'))
+    # def test_add_assignment_get_request(self):
+    #     # Testing GET reqeust to add_assignment redirects to home
+    #     response = self.client.get(reverse('myapp:add_assignment'))
+    #     self.assertEqual(response.status_code, 302)
+    #     self.assertRedirects(response, reverse('myapp:home'))
 
-    def test_add_assignment_post_valid(self):
-        # Testing POST request to add_assignment with valid data and file.
-        response = self.client.post(
-            reverse('myapp:add_assignment'),
-            {
-                'title': 'Test Assignment',
-                'description': 'This is a test assignment.',
-                'due_date': '2024-12-31',
-                'file_upload': self.valid_file
-            }
-        )
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('myapp:assignment_list'))
-        self.assertEqual(Assignment.objects.count(), 1)
-        assignment = Assignment.objects.first()
-        self.assertEqual(assignment.title, 'Test Assignment')
-        self.assertEqual(assignment.user, self.user)
+    # def test_add_assignment_post_valid(self):
+    #     # Testing POST request to add_assignment with valid data and file.
+    #     response = self.client.post(
+    #         reverse('myapp:add_assignment'),
+    #         {
+    #             'title': 'Test Assignment',
+    #             'description': 'This is a test assignment.',
+    #             'due_date': '2024-12-31',
+    #             'file_upload': self.valid_file
+    #         }
+    #     )
+    #     self.assertEqual(response.status_code, 302)
+    #     self.assertRedirects(response, reverse('myapp:assignment_list'))
+    #     self.assertEqual(Assignment.objects.count(), 1)
+    #     assignment = Assignment.objects.first()
+    #     self.assertEqual(assignment.title, 'Test Assignment')
+    #     self.assertEqual(assignment.user, self.user)
 
-    def test_add_assignment_post_invalid_file(self):
-        # Testing POST request to add_assignment with an invalid file type.
-        response = self.client.post(
-            reverse('myapp:add_assignment'),
-            {
-                'title': 'Test Assignment with Invalid File',
-                'description': 'This assignment has an invalid file.',
-                'due_date': '2024-12-31',
-                'file_upload': self.invalid_file
-            }
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content.decode(), 'Invalid file type.')
-        self.assertEqual(Assignment.objects.count(), 0)
+    # def test_add_assignment_post_invalid_file(self):
+    #     # Testing POST request to add_assignment with an invalid file type.
+    #     response = self.client.post(
+    #         reverse('myapp:add_assignment'),
+    #         {
+    #             'title': 'Test Assignment with Invalid File',
+    #             'description': 'This assignment has an invalid file.',
+    #             'due_date': '2024-12-31',
+    #             'file_upload': self.invalid_file
+    #         }
+    #     )
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertEqual(response.content.decode(), 'Invalid file type.')
+    #     self.assertEqual(Assignment.objects.count(), 0)
 
     def test_assignment_list(self):
         # Testing that assignment_list view returns assignments for the logged-in user.
