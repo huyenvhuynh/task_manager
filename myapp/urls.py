@@ -10,4 +10,5 @@ urlpatterns = [
     path('assignments/delete/<int:assignment_id>/', views.delete_assignment, name='delete_assignment'),
     path('assignments/edit/<int:assignment_id>/', views.edit_assignment, name='edit_assignment'),
     path('file_search/', views.file_search, name='file_search'),
+    path('calender/', views.calender, name='calender'),
 ]

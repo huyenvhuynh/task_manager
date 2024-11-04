@@ -161,3 +161,6 @@ def file_search(request):
         'assignments': assignments,
         'courses': user_courses
     })
+
+def calender(request):
+    return render(request, 'myapp/calender.html', {})

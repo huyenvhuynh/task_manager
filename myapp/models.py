@@ -19,10 +19,10 @@ class Assignment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments')
     
     course = models.ForeignKey(
-    Course, 
-    on_delete=models.CASCADE, 
-    related_name='assignments',
-)
+        Course, 
+        on_delete=models.CASCADE, 
+        related_name='assignments',
+    )
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     file_title = models.CharField(max_length=255, null=True, blank=True)
