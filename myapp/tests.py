@@ -19,18 +19,20 @@ class AssignmentTests(TestCase):
             email='testuser@example.com'
         )
         self.client.login(username='testuser', password='password')
+        self.course = Course.objects.create(course_number=2130, course_name='CSO1')
         
-        # Define a valid file for upload
-        self.valid_file = SimpleUploadedFile(
-            "file.txt",
-            b"file content",
-            content_type="text/plain"
-        )
-        self.invalid_file = SimpleUploadedFile(
-            "file.exe",
-            b"invalid content",
-            content_type="application/octet-stream"
-        )
+        # # Define a valid file for upload
+        # self.valid_file = SimpleUploadedFile(
+        #     "file.txt",
+        #     b"file content",
+        #     content_type="text/plain"
+        # )
+        # self.invalid_file = SimpleUploadedFile(
+        #     "file.exe",
+        #     b"invalid content",
+        #     content_type="application/octet-stream"
+        # )
+        
 
     # def test_add_assignment_get_request(self):
     #     # Testing GET reqeust to add_assignment redirects to home
@@ -73,15 +75,13 @@ class AssignmentTests(TestCase):
 
     def test_assignment_list(self):
         # Testing that assignment_list view returns assignments for the logged-in user.
-
-        course = Course.objects.create(course_number=2130, course_name='CSO1')
         
         Assignment.objects.create(
             title='Existing Assignment',
             description='This is an existing assignment.',
             due_date='2024-12-31',
             user=self.user,
-            course=course
+            course=self.course
         )
         response = self.client.get(reverse('myapp:assignment_list'))
         self.assertEqual(response.status_code, 200)
@@ -90,14 +90,13 @@ class AssignmentTests(TestCase):
 
     def test_delete_assignment(self):
         # Testing that delete_assignment removes an assignment.
-        course = Course.objects.create(course_number=2130, course_name='CSO1')
         
         assignment = Assignment.objects.create(
             title='Assignment to Delete',
             description='This assignment will be deleted.',
             due_date='2024-12-31',
             user=self.user,
-            course=course
+            course=self.course
         )
         response = self.client.post(reverse('myapp:delete_assignment', args=[assignment.id]))
         self.assertEqual(response.status_code, 302)
