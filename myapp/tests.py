@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
-from .models import Assignment
+from .models import Assignment, Course
 import os
 
 # Create your tests here.
