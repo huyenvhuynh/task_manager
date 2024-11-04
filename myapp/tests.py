@@ -78,6 +78,7 @@ class AssignmentTests(TestCase):
             description='This is an existing assignment.',
             due_date='2024-12-31',
             user=self.user
+            course='cs2130'
         )
         response = self.client.get(reverse('myapp:assignment_list'))
         self.assertEqual(response.status_code, 200)
@@ -91,6 +92,7 @@ class AssignmentTests(TestCase):
             description='This assignment will be deleted.',
             due_date='2024-12-31',
             user=self.user
+            course='cs2130'
         )
         response = self.client.post(reverse('myapp:delete_assignment', args=[assignment.id]))
         self.assertEqual(response.status_code, 302)
