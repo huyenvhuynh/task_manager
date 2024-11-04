@@ -13,11 +13,13 @@ jobs:
       max-parallel: 4
       fail-fast: false
       matrix:
-        python-version: ["3.12.6"] 
+        python-version: ["3.12.6"]
+
     steps:
     - uses: actions/checkout@v4
+    
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5 
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -27,5 +29,9 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Tests
+      env:
+        DJANGO_SETTINGS_MODULE: myproject.settings
+        GOOGLE_OAUTH_CLIENT_ID: "test_client_id"  
+        GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"  
       run: |
         python manage.py test
