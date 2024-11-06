@@ -2,7 +2,7 @@
 
 import django.core.validators
 import django.db.models.deletion
-import myapp.storages
+import assignments.storages
 from django.conf import settings
 from django.db import migrations, models
 
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=255)),
                 ('description', models.TextField()),
                 ('due_date', models.DateField()),
-                ('file_upload', models.FileField(blank=True, null=True, storage=myapp.storages.AssignmentStorage(), upload_to='', validators=[django.core.validators.FileExtensionValidator(['txt', 'pdf', 'jpg'])])),
+                ('file_upload', models.FileField(blank=True, null=True, storage=assignments.storages.AssignmentStorage(), upload_to='', validators=[django.core.validators.FileExtensionValidator(['txt', 'pdf', 'jpg'])])),
                 ('uploaded_at', models.DateTimeField(auto_now_add=True)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to=settings.AUTH_USER_MODEL)),
             ],

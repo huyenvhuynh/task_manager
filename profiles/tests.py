@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from unittest.mock import patch
-from users.models import Profile
+from profiles.models import Profile
 import os
 
 # Create your tests here.
