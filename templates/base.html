@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Task Planner{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link
+    href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet"
+    />
+    <!-- Bootstrap CSS -->
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    />
+</head>
+<body>
+    <!--Nav Bar-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+        <!-- Add Assignment Button -->
+        {% if user.is_authenticated and user.profile.role == 'user' %}
+        <button
+            class="btn btn-primary me-2"
+            type="button"
+            data-bs-toggle="modal"
+            data-bs-target="#addAssignmentModal"
+        >
+            Add Assignment
+        </button>
+        {% endif %}
+        <!-- Navbar Toggler for Mobile View -->
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Navbar Links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+            </li>
+    
+            <!-- Links for common users -->
+            {% if user.profile.role == 'user' %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'courses:course_list' %}">Courses</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'assignments:assignment_list' %}">My Assignments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'assignments:calendar' %}">Calendar</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'assignments:file_search' %}">Search</a>
+            </li>
+            {% endif %}
+    
+            <!-- Links for admin users -->
+            {% elif user.profile.role == 'admin' %}
+            <li class="nav-item">
+                <a class="nav-link" href="#">Students</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Assignments</a>
+            </li>
+            {% endif %}
+            </ul>
+    
+            <!-- Right-aligned nav content -->
+            <ul class="navbar-nav ms-auto">
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+                <span class="nav-link">Hello, {{ user.get_full_name }}!</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'users:sign_in' %}">Sign In</a>
+            </li>
+            {% endif %}
+            </ul>
+        </div>
+        </div>
+    </nav>
+    
+    <!--Main Content-->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!--Footer-->
+    <footer>
+        {% block footer %}{% endblock %}
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

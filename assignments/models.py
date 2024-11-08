@@ -14,17 +14,13 @@ class Assignment(models.Model):
         due_date (DateField): The due date for the assignment submission.
         file_upload (FileField): An optional file upload related to the assignment, 
             stored with a custom storage backend and validated for specific file extensions.
-        user (ForeignKey): A foreign key linking the assignment to the user who created it.
-        course (ForeignKey): A foreign key linking the assignment to a course.
+        user (ForeignKey): The user who created the assignment, linked via a foreign key.
+        course (ForeignKey): The course to which the assignment belongs, linked via a foreign key.
         uploaded_at (DateTimeField): The timestamp indicating when the assignment was uploaded.
         file_title (CharField): An optional title for the uploaded file.
         file_description (TextField): An optional description for the uploaded file.
         keywords (CharField): Optional, comma-separated keywords for the assignment, aiding in categorization or search.
-
-    Methods:
-        __str__() -> str: Returns the title of the assignment as a string representation.
     """
-    
     title = models.CharField(max_length=255)
     description = models.TextField()
     due_date = models.DateField()
@@ -44,7 +40,7 @@ class Assignment(models.Model):
 
     def __str__(self) -> str:
         """
-        Returns the string representation of the assignment.
+        Return the string representation of the assignment.
 
         Returns:
             str: The title of the assignment.

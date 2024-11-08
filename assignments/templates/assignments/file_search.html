@@ -1,4 +1,5 @@
-{% extends 'myapp/base.html' %} {% block content %}
+{% extends 'base.html' %}
+{% block content %}
 <div class="container mt-5">
   <h1>File Search</h1>
   {% if assignments %}
@@ -10,11 +11,13 @@
     </form>
   </div>
   <!-- List of Assignments -->
-  <!-- rest of the code is in assignment_list.html -->
   <ul class="list-group">
     {% for assignment in assignments %}
     <li class="list-group-item">
-      <h5>{{ assignment.title }}</h5>
+      <div class="d-flex justify-content-between align-items-start">
+        <h5>{{ assignment.title }}</h5>
+        <span class="badge bg-primary">{{ assignment.course.full_name }}</span>
+      </div>
       <p>{{ assignment.description }}</p>
       <p>Due Date: {{ assignment.due_date }}</p>
       <p>Uploaded At: {{ assignment.uploaded_at }}</p>
@@ -42,19 +45,21 @@
       {% endif %}
 
       <div>
-        <a
-          href="{% url 'myapp:edit_assignment' assignment.id %}"
+        
+          href="{% url 'assignments:edit_assignment' assignment.id %}"
           class="btn btn-secondary btn-sm"
           >View and Edit</a
         >
+        {% if assignment.user == user %}  <!-- Only show delete to creator -->
         <form
-          action="{% url 'myapp:delete_assignment' assignment.id %}"
+          action="{% url 'assignments:delete_assignment' assignment.id %}"
           method="post"
           style="display: inline"
         >
           {% csrf_token %}
           <button type="submit" class="btn btn-danger btn-sm">Delete</button>
         </form>
+        {% endif %}
       </div>
     </li>
     {% endfor %}
@@ -63,9 +68,7 @@
   <p>No assignments found.</p>
   {% endif %}
 </div>
-{% endblock %}
 
-<!-- Styling for keyword display -->
 <style>
   .keywords {
     margin-top: 10px;
@@ -80,4 +83,21 @@
     margin-right: 5px;
     font-size: 0.85em;
   }
+
+  /* Add some styling for the course badge */
+  .badge {
+    font-size: 0.9em;
+    padding: 8px 12px;
+  }
+
+  /* Improve spacing in list items */
+  .list-group-item {
+    margin-bottom: 10px;
+  }
+
+  /* Add some margin to the actions div */
+  .list-group-item > div:last-child {
+    margin-top: 15px;
+  }
 </style>
+{% endblock %}

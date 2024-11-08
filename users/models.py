@@ -11,11 +11,7 @@ class Profile(models.Model):
         role (CharField): The role of the user, which can be 'admin' or 'user', with 'user' as the default.
         image (ImageField): The profile image of the user, stored in the 'jpg/' directory, with 'default.jpg' as the default image.
         courses (ManyToManyField): A many-to-many relationship linking this profile to multiple courses.
-
-    Methods:
-        __str__() -> str: Returns the string representation of the profile, displaying the user's email and role.
     """
-    
     ROLE_CHOICES = (
         ('admin', 'Administrator'),
         ('user', 'Common User'),
@@ -27,7 +23,7 @@ class Profile(models.Model):
 
     def __str__(self) -> str:
         """
-        Returns the string representation of the profile.
+        Return the string representation of the profile.
 
         Returns:
             str: A string in the format '<user email> - <role>'.

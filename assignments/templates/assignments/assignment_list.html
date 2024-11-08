@@ -1,5 +1,4 @@
-<!-- templates/myapp/assignment_list.html -->
-{% extends 'myapp/base.html' %} 
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="container mt-5">
@@ -20,7 +19,7 @@
           {% if assignment.file_upload %}
           <p>
               File:
-              <embed src="{{ assignment.file_upload.url }}" width = "800" height = "1000" style =" margin-left: auto; margin-right: auto; display: block;"></a>
+              <embed src="{{ assignment.file_upload.url }}" width="800" height="1000" style="margin-left: auto; margin-right: auto; display: block;"></a>
           </p>
           
           {% if assignment.keywords %}
@@ -38,10 +37,10 @@
           {% endif %}
 
           <div>
-              <a href="{% url 'myapp:edit_assignment' assignment.id %}"
+              <a href="{% url 'assignments:edit_assignment' assignment.id %}"
                   class="btn btn-secondary btn-sm">View and Edit</a>
               {% if assignment.user == user %}  <!-- Only show delete to creator -->
-              <form action="{% url 'myapp:delete_assignment' assignment.id %}"
+              <form action="{% url 'assignments:delete_assignment' assignment.id %}"
                     method="post"
                     style="display: inline">
                   {% csrf_token %}

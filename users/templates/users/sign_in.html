@@ -16,7 +16,7 @@
       {% if user.is_authenticated %}
       <!-- replaced to redirect directly to home page when user logs in -->
         <script type="text/javascript">
-            window.location.href = "{% url 'myapp:home' %}";
+            window.location.href = "{% url 'home' %}";
         </script>
           <!-- <div>
               <h1 class="text-success">
@@ -33,7 +33,7 @@
 
               <a href="{% url 'users:sign_out' %}">Sign out</a>
               <div class="submit">
-                  <form action="{% url 'myapp:home' %}" method="get">
+                  <form action="{% url 'home' %}" method="get">
                       <button type="submit">Go to Home Page</button>
                   </form>
               </div>

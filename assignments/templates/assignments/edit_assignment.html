@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Edit Assignment{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1>Edit Assignment</h1>
+  <form
+    action="{% url 'assignments:edit_assignment' assignment.id %}"
+    method="post"
+    enctype="multipart/form-data"
+  >
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="title" class="form-label">Title</label>
+      <input
+        type="text"
+        class="form-control"
+        id="title"
+        name="title"
+        value="{{ assignment.title }}"
+        required
+      />
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea
+        class="form-control"
+        id="description"
+        name="description"
+        rows="3"
+        required
+      >{{ assignment.description }}</textarea>
+    </div>
+    <div class="mb-3">
+      <label for="due_date" class="form-label">Due Date</label>
+      <input
+        type="date"
+        class="form-control"
+        id="due_date"
+        name="due_date"
+        value="{{ assignment.due_date|date:'Y-m-d' }}"
+        required
+      />
+    </div>
+    <div class="mb-3">
+      <label for="course" class="form-label">Course</label>
+      <select class="form-control" id="course" name="course" required>
+          {% for course in user.profile.courses.all %}
+              <option value="{{ course.id }}" {% if course.id == assignment.course.id %}selected{% endif %}>
+                  {{ course.full_name }}
+              </option>
+          {% endfor %}
+      </select>
+    </div>
+
+    {% if assignment.file_upload %}
+    <div class="mb-3">
+      <label class="form-label">Current File</label>
+      <p>
+        <a href="{{ assignment.file_upload.url }}"
+          >{{ assignment.file_upload.name }}</a
+        >
+      </p>
+    </div>
+
+    <div class="mb-3">
+      <label for="file_upload" class="form-label">Replace File</label>
+      <input
+        type="file"
+        class="form-control"
+        id="file_upload"
+        name="file_upload"
+      />
+    </div>
+
+    <!-- File Metadata section -->
+    <div class="mb-3">
+      <h4>File Metadata</h4>
+      {% if assignment.file_title %}
+        <p>Title: {{ assignment.file_title }}</p>
+      {% endif %}
+      {% if assignment.file_description %}
+        <p>Description: {{ assignment.file_description }}</p>
+      {% endif %}
+      {% if assignment.keywords %}
+        <p>Keywords: {{ assignment.keywords }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+  </form>
+  <a href="{% url 'assignments:assignment_list' %}" class="btn btn-secondary mt-3">Back to Assignments</a>
+</div>
+{% endblock %}
