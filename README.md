@@ -6,8 +6,10 @@ __Name:__
 __Computing ID:__
 
 
-Command to install requirements: pip install -r requirements.txt   
+Command to install requirements: isual 
 
 Command to run server: python manage.py runserver
 
 Command to make migrations: python manage.py migrate
+
+Documentation follows Python's PEP 257 guidelines

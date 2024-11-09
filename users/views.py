@@ -1,3 +1,16 @@
+"""
+Authentication views for handling Google OAuth2 sign-in and user management.
+
+This module provides views for managing user authentication through Google OAuth2,
+including sign-in, sign-out, role selection, and token verification. It handles
+user creation, session management, and role-based access control.
+
+Dependencies:
+    - google.oauth2: For token verification
+    - django.contrib.auth: For user authentication
+    - django.contrib.auth.models: For user management
+"""
+
 import os
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -8,43 +21,49 @@ from google.auth.transport import requests as google_requests
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
 
+
 @csrf_exempt
 def google_sign_in(request):
     """
-    Render the Google sign-in page with the Google client ID.
+    Render the Google sign-in page with OAuth2 client credentials.
 
-    The view renders a template that provides the necessary client ID for Google OAuth2.
+    Provides the necessary Google OAuth2 client ID for the frontend to initiate
+    the authentication flow.
 
     Args:
-        request (HttpRequest): The HTTP request object.
+        request (HttpRequest): The incoming request object.
 
     Returns:
-        HttpResponse: The rendered sign-in page with the client ID context.
+        HttpResponse: Rendered sign-in template with Google client ID in context.
     """
     return render(request, 'users/sign_in.html', {
         'google_client_id': os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
     })
 
+
 def sign_in(request):
     """
-    Display the sign-in page or a success message if the user is already authenticated.
+    Handle user sign-in and display appropriate messages.
 
-    Checks if the user is authenticated and displays a success message with user details
-    or renders the sign-in page if not authenticated.
+    For authenticated users, displays a role-specific success message and user details.
+    For unauthenticated users, shows the sign-in page with Google OAuth2 credentials.
 
     Args:
-        request (HttpRequest): The HTTP request object.
+        request (HttpRequest): The incoming request object containing user session data.
 
     Returns:
-        HttpResponse: The rendered sign-in page or a page with user-specific details.
+        HttpResponse: Rendered template with either:
+            - Success message and user details for authenticated users
+            - Sign-in form with Google client ID for unauthenticated users
     """
     if request.user.is_authenticated:
-        # Retrieve the user's profile and determine the role-based message
-        profile = request.user.profile  
-        if profile.role == 'admin':
-            message = "Successfully signed in as an Administrator!"
-        else:
-            message = "Successfully signed in as a Common User!"
+        # Determine user role and set appropriate message
+        profile = request.user.profile
+        message = (
+            "Successfully signed in as an Administrator!"
+            if profile.role == 'admin'
+            else "Successfully signed in as a Common User!"
+        )
         
         context = {
             'message': message,
@@ -52,127 +71,147 @@ def sign_in(request):
             'name': request.user.get_full_name(),
         }
     else:
-        # User is not authenticated, show the sign-in page with the Google client ID
         context = {
             'google_client_id': os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
         }
     
     return render(request, 'users/sign_in.html', context)
 
+
 @csrf_exempt
 def auth_receiver(request):
     """
-    Handle the authentication process from the Google OAuth2 callback.
+    Process Google OAuth2 authentication callback and handle user creation/login.
 
-    Verifies the received token, retrieves user data, and logs the user in.
-    If the user does not exist, a new user is created.
+    Verifies the OAuth2 token, extracts user information, and either creates a new
+    user or logs in an existing user. Handles session management and redirects
+    based on user status.
 
     Args:
-        request (HttpRequest): The HTTP request object containing the token.
+        request (HttpRequest): The incoming request containing the OAuth2 token.
 
     Returns:
-        HttpResponse:   Redirects to the appropriate page based on user status.
-                        Returns error responses for invalid tokens or request methods.
+        HttpResponse: One of the following:
+            - Redirect to role selection for new users
+            - Redirect to sign-in page for existing users
+            - 400 error for missing token
+            - 403 error for invalid token
+            - 405 error for invalid request method
+
+    Raises:
+        ValueError: If the OAuth2 token verification fails
     """
-    if request.method == 'POST':
-        token = request.POST.get('credential')
-        if not token:
-            return HttpResponse('No token provided', status=400)
+    if request.method != 'POST':
+        return HttpResponse('Invalid request method', status=405)
 
-        try:
-            # Verify the Google OAuth2 token
-            user_data = id_token.verify_oauth2_token(
-                token, google_requests.Request(), os.environ['GOOGLE_OAUTH_CLIENT_ID']
-            )
-        except ValueError:
-            return HttpResponse('Invalid token', status=403)
+    token = request.POST.get('credential')
+    if not token:
+        return HttpResponse('No token provided', status=400)
 
-        # Extract user information from the token
-        email = user_data.get('email')
-        name = user_data.get('name', '')
-
-        # Split the name into first and last name components
-        name_parts = name.split(' ')
-        first_name = name_parts[0] if len(name_parts) > 0 else ''
-        last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
-
-        # Create or get the user and log them in
-        user, created = User.objects.get_or_create(
-            username=email,
-            defaults={'first_name': first_name, 'last_name': last_name, 'email': email}
+    try:
+        # Verify Google OAuth2 token
+        user_data = id_token.verify_oauth2_token(
+            token, 
+            google_requests.Request(), 
+            os.environ['GOOGLE_OAUTH_CLIENT_ID']
         )
+    except ValueError:
+        return HttpResponse('Invalid token', status=403)
 
-        login(request, user)
+    # Process user information
+    email = user_data.get('email')
+    name = user_data.get('name', '')
+    name_parts = name.split(' ')
+    first_name = name_parts[0] if name_parts else ''
+    last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
 
-        # Store user data in the session
-        request.session['user_data'] = {
-            'email': email,
-            'name': f"{first_name} {last_name}"
+    # Create or retrieve user
+    user, created = User.objects.get_or_create(
+        username=email,
+        defaults={
+            'first_name': first_name,
+            'last_name': last_name,
+            'email': email
         }
+    )
 
-        # Redirect new users to select their role, existing users to the sign-in page
-        if created:
-            return redirect('users:select_role')
-        else:
-            return redirect('users:sign_in')
+    # Handle user session
+    login(request, user)
+    request.session['user_data'] = {
+        'email': email,
+        'name': f"{first_name} {last_name}"
+    }
 
-    return HttpResponse('Invalid request method', status=405)
+    return redirect('users:select_role' if created else 'users:sign_in')
+
 
 @login_required
 def select_role(request):
     """
-    Handle role selection for authenticated users.
+    Handle user role selection and profile updates.
 
-    Updates the user's profile with the selected role and renders the sign-in page
-    with a success message.
+    Processes role selection for new users and updates their profile accordingly.
+    Only accepts 'admin' or 'user' as valid roles.
 
     Args:
-        request (HttpRequest): The HTTP request object.
+        request (HttpRequest): The incoming request, must be authenticated.
 
     Returns:
-        HttpResponse: The rendered page with a success message or an error response for invalid role selection.
+        HttpResponse: One of the following:
+            - Rendered sign-in page with success message after role selection
+            - Rendered role selection form for GET requests
+            - 400 error for invalid role selection
+
+    Notes:
+        - Requires user authentication (@login_required)
+        - Updates both profile and session data with selected role
     """
     if request.method == 'POST':
         selected_role = request.POST.get('role')
-        if selected_role in ['admin', 'user']:
-            # Update the user's profile with the selected role
-            request.user.profile.role = selected_role
-            request.user.profile.save()
+        if selected_role not in ['admin', 'user']:
+            return HttpResponse('Invalid role selection', status=400)
 
-            # Ensure 'user_data' exists in the session before updating it
-            if 'user_data' not in request.session:
-                request.session['user_data'] = {}
+        # Update user profile and session
+        request.user.profile.role = selected_role
+        request.user.profile.save()
 
-            # Update the session with the selected role
-            request.session['user_data']['role'] = selected_role
+        # Ensure and update session data
+        if 'user_data' not in request.session:
+            request.session['user_data'] = {}
+        request.session['user_data']['role'] = selected_role
 
-            # Create a success message based on the role
-            message = (
-                "Successfully signed in as an Administrator!"
-                if selected_role == 'admin'
-                else "Successfully signed in as a Common User!"
-            )
+        # Create role-specific success message
+        message = (
+            "Successfully signed in as an Administrator!"
+            if selected_role == 'admin'
+            else "Successfully signed in as a Common User!"
+        )
 
-            return render(request, 'users/sign_in.html', {
-                'message': message,
-                'email': request.user.email,
-                'name': request.user.get_full_name(),
-            })
-
-        return HttpResponse('Invalid role selection', status=400)
+        return render(request, 'users/sign_in.html', {
+            'message': message,
+            'email': request.user.email,
+            'name': request.user.get_full_name(),
+        })
 
     return render(request, 'users/select_role.html')
 
+
 def sign_out(request):
     """
-    Log out the user and clear session data.
+    Handle user sign-out and session cleanup.
+
+    Clears user session data and logs out the user, maintaining clean session state.
 
     Args:
-        request (HttpRequest): The HTTP request object.
+        request (HttpRequest): The incoming request object.
 
     Returns:
-        HttpResponse: Redirects to the sign-in page after logging out the user.
+        HttpResponse: Redirect to sign-in page after successful logout.
+
+    Notes:
+        - Safely removes session data using .pop()
+        - Performs Django logout to clear authentication
     """
-    request.session.pop('user_data', None)  # Safely remove 'user_data' if it exists
+    request.session.pop('user_data', None)
     logout(request)
     return redirect('users:sign_in')

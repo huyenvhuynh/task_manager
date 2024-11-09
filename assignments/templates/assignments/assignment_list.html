@@ -2,89 +2,228 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h1>My Assignments</h1>
+    <h1>My Assignments</h1>
 
-  {% if assignments %}
-  <ul class="list-group">
-      {% for assignment in assignments %}
-      <li class="list-group-item">
-          <div class="d-flex justify-content-between align-items-start">
-              <h5>{{ assignment.title }}</h5>
-              <span class="badge bg-primary">{{ assignment.course.full_name }}</span>
-          </div>
-          <p>{{ assignment.description }}</p>
-          <p>Due Date: {{ assignment.due_date }}</p>
-          <p>Uploaded At: {{ assignment.uploaded_at }}</p>
-          
-          {% if assignment.file_upload %}
-          <p>
-              File:
-              <embed src="{{ assignment.file_upload.url }}" width="800" height="1000" style="margin-left: auto; margin-right: auto; display: block;"></a>
-          </p>
-          
-          {% if assignment.keywords %}
-          <div class="keywords">
-              <strong>Keywords:</strong>
-              {% for keyword in assignment.keyword_list %}
-              <span class="keyword-tag">{{ keyword }}</span>
-              {% endfor %}
-          </div>
-          {% else %}
-          <p>No keywords added.</p>
-          {% endif %}
-          {% else %}
-          <p>No file uploaded.</p>
-          {% endif %}
+    <!-- Add Assignment Button -->
+    {% if user.is_authenticated and user.profile.role == 'user' %}
+    <button
+        class="btn btn-primary mb-3"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#addAssignmentModal"
+    >
+        Add Assignment
+    </button>
+    {% endif %}
 
-          <div>
-              <a href="{% url 'assignments:edit_assignment' assignment.id %}"
-                  class="btn btn-secondary btn-sm">View and Edit</a>
-              {% if assignment.user == user %}  <!-- Only show delete to creator -->
-              <form action="{% url 'assignments:delete_assignment' assignment.id %}"
-                    method="post"
-                    style="display: inline">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-              </form>
-              {% endif %}
-          </div>
-      </li>
-      {% endfor %}
-  </ul>
-  {% else %}
-  <p>No assignments found.</p>
-  {% endif %}
+    {% if assignments %}
+    <ul class="list-group">
+        {% for assignment in assignments %}
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start">
+                <h5>{{ assignment.title }}</h5>
+                <span class="badge bg-primary">{{ assignment.course.full_name }}</span>
+            </div>
+            <p>{{ assignment.description }}</p>
+            <p>Due Date: {{ assignment.due_date }}</p>
+            <p>Uploaded At: {{ assignment.uploaded_at }}</p>
+            
+            {% if assignment.file_upload %}
+            <p>
+                File:
+                <embed src="{{ assignment.file_upload.url }}" width="800" height="1000" style="margin-left: auto; margin-right: auto; display: block;">
+            </p>
+            
+            {% if assignment.keywords %}
+            <div class="keywords">
+                <strong>Keywords:</strong>
+                {% for keyword in assignment.keyword_list %}
+                <span class="keyword-tag">{{ keyword }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No keywords added.</p>
+            {% endif %}
+            {% else %}
+            <p>No file uploaded.</p>
+            {% endif %}
+
+            <div>
+                <a href="{% url 'assignments:edit_assignment' assignment.id %}"
+                    class="btn btn-secondary btn-sm">View and Edit</a>
+                {% if assignment.user == user %}
+                <form action="{% url 'assignments:delete_assignment' assignment.id %}"
+                      method="post"
+                      style="display: inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No assignments found.</p>
+    {% endif %}
 </div>
+
+<!-- Add Assignment Modal -->
+{% if user.is_authenticated and user.profile.role == 'user' %}
+<div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAssignmentModalLabel">New Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Modal Body with Form -->
+            <div class="modal-body">
+                <form action="{% url 'assignments:add_assignment' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}" />
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="date" class="form-control" id="due_date" name="due_date" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="course" class="form-label">Course</label>
+                        <select class="form-control" id="course" name="course" required>
+                            {% for course in user.profile.courses.all %}
+                                <option value="{{ course.id }}">{{ course.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file_upload" class="form-label">Upload File</label>
+                        <input type="file" class="form-control" id="file_upload" name="file_upload" />
+                    </div>
+
+                    <!-- File Meta Data Section -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleMetaDataSection()">
+                                <span id="keywordsToggleIcon">Add File Meta Data ▼</span>
+                            </button>
+                        </div>
+                        <div id="metadataContainer" style="display: none;">
+                            <div class="mb-2">
+                                <input type="text" class="form-control" id="file_title" name="file-title" placeholder="File Title" />
+                            </div>
+                            <div class="mb-2">
+                                <textarea class="form-control" id="file_description" name="file-description" rows="2" placeholder="File Description"></textarea>
+                            </div>
+                            <div class="tags-input-container d-flex">
+                                <input type="text" class="form-control me-2" id="keywords-input" placeholder="Add Keyword" />
+                                <button type="button" class="btn btn-sm btn-primary" onclick="addTag()">Add</button>
+                            </div>
+                            <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
+                            <input type="hidden" name="keywords" id="keywords" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <style>
 .keywords {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 
 .keyword-tag {
-  background-color: #e0e0e0;
-  color: #333;
-  padding: 5px 10px;
-  border-radius: 5px;
-  display: inline-block;
-  margin-right: 5px;
-  font-size: 0.85em;
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 0.85em;
 }
 
-/* Add some styling for the course badge */
 .badge {
-  font-size: 0.9em;
-  padding: 8px 12px;
+    font-size: 0.9em;
+    padding: 8px 12px;
 }
 
-/* Improve spacing in list items */
 .list-group-item {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
-/* Add some margin to the actions div */
 .list-group-item > div:last-child {
-  margin-top: 15px;
+    margin-top: 15px;
 }
 </style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('addAssignmentModal').addEventListener('hidden.bs.modal', function () {
+        window.location.reload();
+    });
+
+    function addTag() {
+        const input = document.getElementById("keywords-input");
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+
+        let tag = input.value.trim();
+        if (tag) {
+            const tagElement = document.createElement("span");
+            tagElement.className = "tag";
+            tagElement.textContent = tag;
+
+            const deleteButton = document.createElement("span");
+            deleteButton.className = "tag-delete";
+            deleteButton.textContent = "×";
+            deleteButton.onclick = function () {
+                tagsDisplay.removeChild(tagElement);
+                updateHiddenInput();
+            };
+
+            tagElement.appendChild(deleteButton);
+            tagsDisplay.appendChild(tagElement);
+
+            input.value = "";
+            updateHiddenInput();
+        }
+    }
+
+    function updateHiddenInput() {
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+
+        let tags = Array.from(tagsDisplay.getElementsByClassName("tag")).map(
+            (tag) => tag.textContent.replace("×", "").trim()
+        );
+
+        hiddenInput.value = tags.join(",");
+    }
+
+    function toggleMetaDataSection() {
+        const metadataContainer = document.getElementById("metadataContainer");
+        const keywordsToggleIcon = document.getElementById("keywordsToggleIcon");
+
+        if (metadataContainer.style.display === "none") {
+            metadataContainer.style.display = "block";
+            keywordsToggleIcon.textContent = "Add File Meta Data ▲";
+        } else {
+            metadataContainer.style.display = "none";
+            keywordsToggleIcon.textContent = "Add File Meta Data ▼";
+        }
+    }
+</script>
 {% endblock %}
