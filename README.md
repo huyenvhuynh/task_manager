@@ -1,50 +1,61 @@
-# Project Management Application (PMA)
+# Task Management System (TMS)
 
-A Django-based web application for managing projects and team collaboration, built as part of CS 3240.
+A Django-based web application for managing academic assignments, discussions, and course collaborations, developed for CS 3240.
 
 ## 🌟 Features
 
-### User Authentication & Roles
-- Google account integration for login
-- Multiple user types:
-  - Anonymous Users: Limited access to view project listings
-  - Common Users: Can create/join projects and participate
-  - PMA Administrators: Full moderation capabilities
-  - Django Administrators: Access to Django admin interface
+### User Authentication
+- Google OAuth integration for secure login
+- User profile management with course enrollment
+- Role-based access control
 
-### Course Work Management
-- Create and manage assignments with:
+### Course Management
+- Course enrollment system
+- Course listings with detailed information
+- Course-specific content organization
+
+### Assignment Management
+- Create and track assignments with:
   - Title and description
-  - Owner and member management
-  - File uploads with metadata
-  - Message board system
-- File management with metadata tracking:
-  - File title
-  - Timestamp
-  - Description
-  - Keywords for searching
+  - Due dates
+  - Course association
+  - File attachments
+  - Metadata tracking
+- File management with metadata:
+  - File titles and descriptions
+  - Upload timestamps
+  - Keywords for enhanced searching
 
-### Storage & Files
-- Cloud storage integration with Amazon S3
-- Supported file types:
+### Discussion System
+- Course-specific discussion boards
+- Create and participate in discussions
+- Comment system for user interaction
+- Filter discussions by enrolled courses
+
+### File Management
+- Amazon S3 integration for file storage
+- Supported file formats:
   - PDF documents
   - Text files (.txt)
   - JPEG images
-- File metadata and search capabilities
+- File metadata and search functionality
 
 ## 🔧 Technical Requirements
 
-- Python 3.8+
-- Django 5.0
-- PostgreSQL database
-- Additional dependencies in requirements.txt
+- Python 3.12
+- Django 5.1.1
+- Additional packages:
+  - django-storages
+  - boto3
+  - whitenoise
+  - django-widget-tweaks
 
 ## 🚀 Installation
 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd project-management-app
+cd project-a-04
 ```
 
 2. Set up virtual environment:
@@ -63,65 +74,80 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-5. Create superuser:
-```bash
-python manage.py createsuperuser
-```
-
 ## 💻 Configuration Required
 
-1. Google OAuth credentials for authentication
-2. Amazon S3 bucket configuration:
-   - Access key
-   - Secret key
-   - Bucket name
-3. PostgreSQL database connection
-4. Django secret key
-5. Heroku deployment settings
+1. Create a `.env` file with:
+```
+GOOGLE_OAUTH_CLIENT_ID=your_client_id
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_STORAGE_BUCKET_NAME=your_bucket_name
+```
+
+2. Configure `settings.py` with:
+- Database settings
+- AWS S3 configuration
+- Google OAuth settings
 
 ## 🚀 Running the Application
 
-Development server:
+Start the development server:
 ```bash
 python manage.py runserver
 ```
 Access at `http://localhost:8000`
 
+## 📱 Features Overview
 
-## 🧪 Testing
+### User Features
+- Google Sign-in/Sign-out
+- Course enrollment
+- Assignment creation and management
+- File uploads with metadata
+- Discussion participation
 
-- Run tests:
-```bash
-python manage.py test
+### Course Features
+- Course listing
+- Course-specific assignments
+- Course-specific discussions
+- File organization by course
+
+### Assignment Features
+- Create assignments with details
+- Upload and manage files
+- Track due dates
+- Search by keywords
+
+### Discussion Features
+- Create course-specific discussions
+- Add comments to discussions
+- Filter discussions by course
+- Track discussion timestamps
+
+## 📂 Project Structure
 ```
-
-## 📝 Documentation
-
-All code follows PEP 257 guidelines for docstrings:
-
-```python
-def create_project(request):
-    """
-    Create a new project in the system.
-
-    Args:
-        request: HTTP request containing project data
-
-    Returns:
-        HttpResponse: Redirect to new project or error page
-    """
-    # Implementation
+project-a-04/
+├── core/                 # Project settings
+├── courses/              # Course management
+├── assignments/          # Assignment functionality
+├── discussions/          # Discussion system
+├── users/                # User profiles
+└── templates/            # HTML templates
 ```
 
 ## ⚠️ Important Notes
 
-- This is a class project for CS 3240
-- Not intended for production use
-- No sensitive information should be submitted
-- System is not actively monitored
+- Development project for CS 3240
+- Not for production use
+- Uses test/development credentials
+
+## 👥 Team
+
+- Isaac Coles
+- Samuel Honigblum
+- Jessica Choi
+- Huyen Huynh
 
 ## 📄 License
 
-This project is part of CS 3240 coursework and is subject to University of Virginia academic policies.
-
-Authors: Isaac Coles,  Samuel Honigblum, Jessica Choi, and Huyen Huynh
+This project is part of CS 3240 coursework at the University of Virginia.

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{% url 'discussions:discussion_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Discussions
+        </a>
+    </div>
+
+    <!-- Discussion -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="card-title mb-0">{{ discussion.title }}</h1>
+                <span class="badge bg-primary">{{ discussion.course.name }}</span>
+            </div>
+            <div class="text-muted mb-3">
+                Posted by {{ discussion.user.get_full_name }} on {{ discussion.created_at|date:"M d, Y" }}
+            </div>
+            <div class="discussion-content mb-4">
+                {{ discussion.content|linebreaks }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments-section">
+        <h3 class="mb-4">Comments ({{ discussion.comments.count }})</h3>
+        
+        <!-- Add Comment Form -->
+        {% if user.is_authenticated %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Add a comment</label>
+                        <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Comments List -->
+        {% if discussion.comments.all %}
+        <div class="comments-list">
+            {% for comment in discussion.comments.all %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="comment-author fw-bold">
+                            {{ comment.user.get_full_name }}
+                        </div>
+                        <small class="text-muted">
+                            {{ comment.created_at|date:"M d, Y g:i A" }}
+                        </small>
+                    </div>
+                    <div class="comment-content">
+                        {{ comment.content|linebreaks }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No comments yet. Be the first to comment!
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.discussion-content {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.comments-list {
+    max-width: 900px;
+}
+
+.comment-content {
+    white-space: pre-line;
+}
+</style>
+{% endblock %}
