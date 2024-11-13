@@ -227,4 +227,4 @@ def anonymous(request):
         HttpResponse: Redirect to sign-in page after successful logout.
     """
 
-    return render(request, 'anonymous.html', {})
+    return render(request, 'anonymous_home.html', {})
