@@ -215,3 +215,16 @@ def sign_out(request):
     request.session.pop('user_data', None)
     logout(request)
     return redirect('users:sign_in')
+
+def anonymous(request):
+    """
+    Handle anonymous user experience
+
+    Args:
+        request (HttpRequest): The incoming request object.
+
+    Returns:
+        HttpResponse: Redirect to sign-in page after successful logout.
+    """
+
+    return render(request, 'home.html')
