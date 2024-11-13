@@ -8,16 +8,17 @@ class Profile(models.Model):
 
     Attributes:
         user (OneToOneField): A one-to-one relationship linking this profile to a user account.
-        role (CharField): The role of the user, which can be 'admin' or 'user', with 'user' as the default.
+        role (CharField): The role of the user, which can be 'admin' or 'user' or 'anonymous', with 'user' as the default.
         image (ImageField): The profile image of the user, stored in the 'jpg/' directory, with 'default.jpg' as the default image.
         courses (ManyToManyField): A many-to-many relationship linking this profile to multiple courses.
     """
     ROLE_CHOICES = (
         ('admin', 'Administrator'),
         ('user', 'Common User'),
+        ('anonymous', 'Guest'),
     )
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='anonymous')
     image = models.ImageField(upload_to='jpg/', default='default.jpg')
     courses = models.ManyToManyField(Course, related_name='profiles', blank=True)  
 

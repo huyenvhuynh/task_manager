@@ -41,7 +41,7 @@
             </li>
     
             <!-- Links for common users -->
-            {% if user.profile.role == 'user' %}
+            {% if user.profile.role == 'user' or user.profile.role == 'anonymous' %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'courses:course_list' %}">Courses</a>
             </li>

@@ -15,12 +15,15 @@
         Welcome to <br />
         Task Planner
     </h1>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated or user.profile.role == 'anonymous' %}
     <div class="container glass">
         <p>Your role: {{ user.profile.role }}</p>
     </div>
     <!-- Add your main content here -->
     {% else %}
+    <div class="container glass">
+        <p>Your role: {{ user.profile.role }}</p>
+    </div>
     <p>Please sign in to access your tasks.</p>
     {% endif %}
     </div>
