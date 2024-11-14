@@ -12,56 +12,40 @@
 </head>
 
 <body>
-  <div class="container">
-      {% if user.is_authenticated %}
-      <!-- replaced to redirect directly to home page when user logs in -->
-        <script type="text/javascript">
-            window.location.href = "{% url 'home' %}";
-        </script>
-          <!-- <div>
-              <h1 class="text-success">
-                  You have successfully signed in as 
-                  {% if user.profile.role == 'admin' %} 
-                      an Administrator!
-                  {% else %} 
-                      a Common User!
-                  {% endif %}
-              </h1>
-              
-              <p class="userEmail">Email: {{ user.email }}</p>
-              <p class="userName">Name: {{ user.get_full_name }}</p>
-
-              <a href="{% url 'users:sign_out' %}">Sign out</a>
-              <div class="submit">
-                  <form action="{% url 'home' %}" method="get">
-                      <button type="submit">Go to Home Page</button>
-                  </form>
-              </div>
-          </div> -->
-      {% else %}
-          <div>
-              <div id="g_id_onload"
-                    data-client_id="{{ google_client_id }}"
-                    data-context="signin"
-                    data-ux_mode="redirect"
-                    data-login_uri="{% url 'users:auth_receiver' %}"
-                    data-auto_prompt="false">
-              </div>
-
-              <div class="g_id_signin"
-                    data-type="standard"
-                    data-shape="rectangular"
-                    data-theme="outline"
-                    data-text="signin_with"
-                    data-size="large"
-                    data-logo_alignment="left">
-              </div>
-          </div>
-      {% endif %}
-
-      <div class="add_spacing">
-        <a href="{% url 'users:anonymous' %}" class="btn btn-primary">Continue without signing in</a>
+  <div class="justify-center text-center">
+    <h1>
+      Log In
+    </h1>
+    
+    {% if user.is_authenticated %}
+    <!-- replaced to redirect directly to home page when user logs in -->
+    <script type="text/javascript">
+        window.location.href = "{% url 'home' %}";
+    </script>
+    {% else %}
+    <div>
+      <div id="g_id_onload"
+            data-client_id="{{ google_client_id }}"
+            data-context="signin"
+            data-ux_mode="redirect"
+            data-login_uri="{% url 'users:auth_receiver' %}"
+            data-auto_prompt="false">
       </div>
+
+      <div class="g_id_signin"
+            data-type="standard"
+            data-shape="rectangular"
+            data-theme="outline"
+            data-text="signin_with"
+            data-size="large"
+            data-logo_alignment="left">
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="add_spacing">
+      <a href="{% url 'users:anonymous' %}" class="btn btn-primary">Continue without signing in</a>
+    </div>
   </div>
 </body>
 </html>

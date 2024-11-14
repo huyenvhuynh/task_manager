@@ -35,13 +35,11 @@
         <!-- Navbar Links -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-            {% if user.is_authenticated %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'home' %}">Home</a>
             </li>
     
             <!-- Links for common users -->
-            {% if user.profile.role == 'user' or user.profile.role == 'anonymous' %}
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'courses:course_list' %}">Courses</a>
             </li>
@@ -57,10 +55,9 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'discussions:discussion_list' %}">Discussions</a>
             </li>
-            {% endif %}
     
             <!-- Links for admin users -->
-            {% elif user.profile.role == 'admin' %}
+            {% if user.profile.role == 'admin' %}
             <li class="nav-item">
                 <a class="nav-link" href="#">Students</a>
             </li>

@@ -4,30 +4,54 @@
 </head>
 
 <body>
-<div class="absolute container mt-5">
-    <div class="absolute inset-0 justify-center">
-    <div class="bg-shape1 bg-teal opacity-50 bg-blur"></div>
-    <div class="bg-shape2 bg-primary opacity-50 bg-blur"></div>
-    <div class="bg-shape1 bg-purple opacity-50 bg-blur"></div>
+    <div class="container">
+        <div class="absolute container mt-5">
+            <div class="absolute inset-0 justify-center">
+            <div class="bg-shape1 bg-teal opacity-50 bg-blur"></div>
+            <div class="bg-shape2 bg-primary opacity-50 bg-blur"></div>
+            <div class="bg-shape1 bg-purple opacity-50 bg-blur"></div>
+        </div>
+        <div>
+            <h1>
+                Welcome to <br />
+                Task Planner <br />
+            </h1>
+        </div>
     </div>
-    <div>
-    <h1>
-        Welcome to <br />
-        Task Planner
-    </h1>
-    {% if user.is_authenticated or user.profile.role == 'anonymous' %}
-    <div class="container glass">
-        <p>Your role: {{ user.profile.role }}</p>
-    </div>
-    <!-- Add your main content here -->
-    {% else %}
-    <div class="container glass">
-        <p>Your role: {{ user.profile.role }}</p>
-    </div>
-    <p>Please sign in to access your tasks.</p>
-    {% endif %}
-    </div>
-</div>
-</body>
 
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    
+    <div class="justify-center text-center">
+        {% if user.is_authenticated %}
+        <div class="container glass" style="padding:20px; padding-top: 5px;">
+            <p>Your role: {{ user.profile.role }}</p>
+        </div>
+        {% else %}
+        <div class="add_spacing">
+            <br />
+            <a href="{% url 'users:sign_in' %}" class="btn btn-primary">Sign in to get started →</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
 {% endblock %}

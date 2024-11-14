@@ -31,9 +31,10 @@ def home(request):
     Returns:
         HttpResponse: Rendered home page or redirect to sign in
     """
-    if request.user.is_authenticated:
-        return render(request, 'home.html')
-    return redirect('users:sign_in')
+    # if request.user.is_authenticated:
+    #     return render(request, 'home.html')
+    # return redirect('users:sign_in')
+    return render(request, 'home.html')
 
 
 @login_required
