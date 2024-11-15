@@ -1,0 +1,134 @@
+<!-- templates/myapp/about.html -->
+{% extends 'base.html' %} {% block content %}
+<!DOCTYPE html>
+<html lang="en">
+  <header>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+        .nav-about{
+            font-weight: bold;
+            color:rgb(39, 112, 221);
+        }
+
+        .nav-about:hover {
+            font-weight: bold;
+            color: rgb(2, 67, 165);
+        }
+
+        /* Container */
+        .container {
+          max-width: 800px;
+        }
+    
+        /* About Title */
+        .about-title {
+          font-family: "Raleway", sans-serif;
+          padding-top: 50px;
+          color: #333;
+        }
+    
+        /* About Text */
+        .about-text {
+          font-family: "Raleway", sans-serif;
+          color: #555;
+        }
+    
+        /* Features Section */
+        .features {
+          display: flex;
+          justify-content: space-around;
+        }
+    
+        .feature-item {
+          max-width: 30%;
+        }
+    
+        .feature-title {
+          font-family: "Raleway", sans-serif;
+          color: #222;
+        }
+    
+        .feature-text {
+          font-family: "Raleway", sans-serif;
+          color: #666;
+        }
+    
+        /* Mission Section */
+        .description-section {
+          background-color: #f8f8f8;
+          border-radius: 8px;
+          padding: 20px;
+          margin-top: 40px;
+        }
+    
+        .description {
+          font-family: "Raleway", sans-serif;
+          font-style: italic;
+          color: #444;
+          margin-bottom: 10px;
+        }
+    
+        .members {
+          font-family: "Raleway", sans-serif;
+          font-weight: bold;
+          color: #555;
+        }
+      </style>
+  </header>
+
+  <body>
+    <div class="container mt-5">
+      <h1 class="about-title">ABOUT US</h1>
+      <div class="content-section mt-4">
+        <p class="about-text">
+            Our task management website provides a streamlined solution for students and professionals to organize their assignments and deadlines effectively. Users can add assignments by linking them to specific courses, making it easy to track tasks across different subjects or projects. The platform also includes a personalized calendar feature, allowing users to plan and visualize their workload. With a clear overview of upcoming assignments and deadlines, users can manage their time more efficiently and stay on top of their responsibilities.
+        </p>
+      </div>
+
+      <div class="features mt-5 d-flex justify-content-around">
+        <h2>FEATURES</h2> <br>
+        <div class="feature-item text-center">
+          <h3 class="feature-title">Assignments</h3>
+          <p class="feature-text">
+            Add, track and organize tasks and deadlines easily.
+          </p>
+        </div>
+        <div class="feature-item text-center">
+          <h3 class="feature-title">Calendar</h3>
+          <p class="feature-text">
+            Clear overview of all your assignments, manage your time effectively.
+          </p>
+        </div>
+        <div class="feature-item text-center">
+          <h3 class="feature-title">Discussions</h3>
+          <p class="feature-text">
+            Collaborate with other users, share insights and ask questions.
+          </p>
+        </div>
+      </div>
+
+      <div class="description-section text-center mt-5 p-4">
+        <blockquote class="description">
+            This project is part of CS 3240 coursework at the University of Virginia.
+        </blockquote>
+        <p class="members">
+            Isaac Coles | Samuel Honigblum | Jessica Choi | Huyen Huynh</p>
+      </div>
+    </div>
+  </body>
+  </html>
+
+  {% endblock %} {% block styles %}
+
+  {% endblock %}
+</html>
