@@ -16,23 +16,19 @@
   </head>
   <body>
     <div class="role-selection">
-        <h1>Select Your Role</h1>
-        <form method="POST">
-          {% csrf_token %}
-          <div class="role-option">
-              <label>
-                <input type="radio" name="role" value="user" />
-                Common User </label><br />
-              <label>
-          </div>
-            <div class="role-option">
-                <label>
-                    <input type="radio" name="role" value="admin" />
-                    Administrator </label><br />
-                </label>
-            </div>
-          <button type="submit" class="btn btn-submit">Submit</button>
-        </form>
+      <h1>Select Your Role</h1>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="role-option">
+          <input type="radio" id="user" name="role" value="user" />
+          <label for="user">Common User</label>
+        </div>
+        <div class="role-option">
+          <input type="radio" id="admin" name="role" value="admin" />
+          <label for="admin">Administrator</label>
+        </div>
+        <button type="submit" class="btn btn-submit">Submit</button>
+      </form>
     </div>
   </body>
 
@@ -79,19 +75,20 @@
     }
     /* Default hover effect */
     .role-option:hover {
-        background-color: #e8eaf6;
-        border-color: #673ab7;
+      background-color: #e8eaf6;
+      border-color: #673ab7;
     }
 
     /* Checked (selected) state with darker color */
     .role-option input:checked + label {
-        background-color: #673ab7;
-        color: white;
-        border-color: #5e35b1;
-        padding: 1rem;
-        border-radius: 5px;
-        display: block;
+      background-color: #673ab7; /* Purple color */
+      color: white;
+      border-color: #5e35b1;
+      /* padding: 1rem; */
+      border-radius: 5px;
+      display: block;
     }
+
     .btn-submit {
       margin-top: 1.5rem;
       background-color: #673ab7;
