@@ -42,7 +42,7 @@ body {
   height: 500px;
   border-radius: 9999px;
   position: relative;
-  animation: two 10s infinite;
+  animation: two 1s infinite;
 }
 
 @keyframes one {
