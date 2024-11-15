@@ -69,7 +69,7 @@ def course_detail(request, pk):
     return render(request, 'courses/course_detail.html', {'course': course})
 
 
-@login_required
+# @login_required
 def course_list(request):
     """
     Display a list of all available courses.
