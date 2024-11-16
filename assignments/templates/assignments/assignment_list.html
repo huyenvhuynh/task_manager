@@ -16,7 +16,43 @@
     </button>
     {% endif %}
 
-    {% if assignments %}
+    {%if assignments %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Due Date</th>
+                    <th>Course</th>
+                    <th>Assignment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments|dictsort:"due_date" %}
+                <tr>
+                    <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                    <td>{{ assignment.course.full_name }}</td>
+                    <td>
+                        <a href="{% url 'assignments:edit_assignment' assignment.id %}">
+                            {{ assignment.title }}
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="assignment-{{ assignment.id }}">
+                            <label class="form-check-label" for="assignment-{{ assignment.id }}">
+                                <span class="visually-hidden">Mark as complete</span>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- {% if assignments %}
     <ul class="list-group">
         {% for assignment in assignments %}
         <li class="list-group-item">
@@ -66,11 +102,11 @@
     {% else %}
     <p>No assignments found.</p>
     {% endif %}
-</div>
+</div> -->
 
 <!-- Add Assignment Modal -->
 {% if user.is_authenticated and user.profile.role == 'user' %}
-<div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
+<div class="modal" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <!-- Modal Header -->
@@ -93,7 +129,12 @@
                     </div>
                     <div class="mb-3">
                         <label for="due_date" class="form-label">Due Date</label>
-                        <input type="date" class="form-control" id="due_date" name="due_date" required />
+                        <input type="date" 
+                               class="form-control" 
+                               id="due_date" 
+                               name="due_date" 
+                               required 
+                               min="{{ now|date:'Y-m-d\TH:i' }}" />
                     </div>
                     <div class="mb-3">
                         <label for="course" class="form-label">Course</label>
