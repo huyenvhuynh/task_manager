@@ -231,3 +231,12 @@ def anonymous(request):
 
 def about(request):
     return render(request, 'users/about.html', {})
+
+def locked(request):
+    """
+    Prevents anonymous users from accessing protected pages
+
+    Args:
+        request (HttpRequest): The incoming request object.
+    """
+    return render(request, 'users/locked.html', {})

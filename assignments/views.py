@@ -204,8 +204,7 @@ def edit_assignment(request, assignment_id):
         'courses': user_courses
     })
 
-
-# @login_required
+@login_required
 def file_search(request):
     """
     Search assignments based on keywords.

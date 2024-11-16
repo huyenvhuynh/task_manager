@@ -11,4 +11,5 @@ urlpatterns = [
     path('select-role/', views.select_role, name='select_role'),
     path('anonymous/', views.anonymous, name='anonymous'),
     path('about/', views.about, name='about'),
+    path('locked/', views.locked, name='locked'),
 ]
