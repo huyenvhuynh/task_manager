@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from courses.models import Course
+from assignments.models import Assignment
 
 class Profile(models.Model):
     """
@@ -21,6 +22,8 @@ class Profile(models.Model):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='anonymous')
     image = models.ImageField(upload_to='jpg/', default='default.jpg')
     courses = models.ManyToManyField(Course, related_name='profiles', blank=True)  
+
+    completed_assignments = models.ManyToManyField(Assignment, related_name='completed_by', blank=False)
 
     def __str__(self) -> str:
         """
