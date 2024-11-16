@@ -167,8 +167,8 @@ def edit_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment,
                                 id=assignment_id,
                                 course__in=request.user.profile.courses.all())
-    if assignment.user != request.user:
-        return HttpResponseForbidden("You can't edit this assignment")
+    # if assignment.user != request.user:
+    #     return HttpResponseForbidden("You can't edit this assignment")
 
     if request.method == 'POST':
         # Update assignment data
