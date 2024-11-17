@@ -11,4 +11,5 @@ urlpatterns = [
     path('assignments/edit/<int:assignment_id>/', views.edit_assignment, name='edit_assignment'),
     path('file_search/', views.file_search, name='file_search'),
     path('calendar/', views.calendar, name='calendar'),
+    path('toggle-complete/<int:assignment_id>/', views.toggle_complete, name='toggle_complete'),
 ]

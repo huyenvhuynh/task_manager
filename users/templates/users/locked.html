@@ -1,0 +1,44 @@
+{% extends 'base.html' %} {% block content %} {% load static %}
+<div class="container">
+    <div class="role-selection">
+      <h1>Please sign in to access this page</h1>
+      <a href="{% url 'users:sign_in' %}" class="btn btn-submit">sign in</a>
+
+</div>
+
+  <style>
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+    }
+    .role-selection {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+    }
+    .role-selection h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-submit {
+      margin-top: 1.5rem;
+      background-color: #673ab7;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 5px;
+    }
+    .btn-submit:hover {
+      background-color: #5e35b1;
+    }
+  </style>
+</div>
+  
+{% endblock %}

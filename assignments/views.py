@@ -31,9 +31,10 @@ def home(request):
     Returns:
         HttpResponse: Rendered home page or redirect to sign in
     """
-    if request.user.is_authenticated:
-        return render(request, 'home.html')
-    return redirect('users:sign_in')
+    # if request.user.is_authenticated:
+    #     return render(request, 'home.html')
+    # return redirect('users:sign_in')
+    return render(request, 'home.html')
 
 
 @login_required
@@ -98,10 +99,10 @@ def add_assignment(request):
 @login_required
 def assignment_list(request):
     """
-    Display list of assignments for the authenticated user's courses.
+    Display list of uncompleted assignments for the authenticated user's courses.
 
-    Retrieves and displays all assignments associated with the courses
-    the user is enrolled in, including keyword processing for display.
+    Retrieves and displays assignments associated with the courses
+    the user is enrolled in, excluding those marked as completed.
 
     Args:
         request: HttpRequest object
@@ -110,7 +111,10 @@ def assignment_list(request):
         HttpResponse: Rendered assignment list page
     """
     user_courses = request.user.profile.courses.all()
-    assignments = Assignment.objects.filter(course__in=user_courses)
+    # Filter out completed assignments using exclude()
+    assignments = Assignment.objects.filter(course__in=user_courses).exclude(
+        completed_by=request.user.profile
+    )
 
     # Process keywords for display
     for assignment in assignments:
@@ -163,8 +167,8 @@ def edit_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment,
                                 id=assignment_id,
                                 course__in=request.user.profile.courses.all())
-    if assignment.user != request.user:
-        return HttpResponseForbidden("You can't edit this assignment")
+    # if assignment.user != request.user:
+    #     return HttpResponseForbidden("You can't edit this assignment")
 
     if request.method == 'POST':
         # Update assignment data
@@ -202,7 +206,6 @@ def edit_assignment(request, assignment_id):
         'assignment': assignment,
         'courses': user_courses
     })
-
 
 @login_required
 def file_search(request):
@@ -255,3 +258,14 @@ def calendar(request):
         HttpResponse: Rendered calendar page
     """
     return render(request, 'assignments/calendar.html', {})
+
+# allow assignments to be marked as completed
+@login_required
+def toggle_complete(request, assignment_id):
+    if request.method == 'POST':
+        assignment = Assignment.objects.get(id=assignment_id)
+        if assignment in request.user.profile.completed_assignments.all():
+            request.user.profile.completed_assignments.remove(assignment)
+        else:
+            request.user.profile.completed_assignments.add(assignment)
+    return redirect('assignments:assignment_list')

@@ -16,7 +16,84 @@
     </button>
     {% endif %}
 
-    {% if assignments %}
+    {%if assignments %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Due Date</th>
+                    <th>Course</th>
+                    <th>Assignment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments|dictsort:"due_date" %}
+                <tr data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="{{ assignment.description }}"
+                    style="cursor: pointer"
+                    onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
+                    <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                    <td>{{ assignment.course.full_name }}</td>
+                    <td>{{ assignment.title }}</td>
+                    <td class="text-center">
+                        <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
+                            {% csrf_token %}
+                            <input 
+                                type="checkbox" 
+                                onChange="this.form.submit()"
+                                {% if assignment in user.profile.completed_assignments.all %}checked{% endif %}
+                            >
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="mt-4">Completed Assignments</h3>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Due Date</th>
+                    <th>Course</th>
+                    <th>Assignment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in user.profile.completed_assignments.all|dictsort:"due_date" %}
+                <tr data-bs-toggle="tooltip" 
+                data-bs-placement="top" 
+                title="{{ assignment.description }}"
+                style="cursor: pointer"
+                onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
+                <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                <td>{{ assignment.course.full_name }}</td>
+                <td>{{ assignment.title }}</td>
+                <td class="text-center">
+                    <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
+                        {% csrf_token %}
+                            <input 
+                                type="checkbox" 
+                                onChange="this.form.submit()"
+                                checked
+                            >
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% endif %}
+
+    
+    <!-- {% if assignments %}
     <ul class="list-group">
         {% for assignment in assignments %}
         <li class="list-group-item">
@@ -66,11 +143,11 @@
     {% else %}
     <p>No assignments found.</p>
     {% endif %}
-</div>
+</div> -->
 
 <!-- Add Assignment Modal -->
 {% if user.is_authenticated and user.profile.role == 'user' %}
-<div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
+<div class="modal" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <!-- Modal Header -->
@@ -93,7 +170,12 @@
                     </div>
                     <div class="mb-3">
                         <label for="due_date" class="form-label">Due Date</label>
-                        <input type="date" class="form-control" id="due_date" name="due_date" required />
+                        <input type="date" 
+                               class="form-control" 
+                               id="due_date" 
+                               name="due_date" 
+                               required 
+                               min="{{ now|date:'Y-m-d\TH:i' }}" />
                     </div>
                     <div class="mb-3">
                         <label for="course" class="form-label">Course</label>
@@ -171,6 +253,12 @@
 
 {% block scripts %}
 <script>
+    // Initialize tooltips; needed to view assignment description on hover
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
     document.getElementById('addAssignmentModal').addEventListener('hidden.bs.modal', function () {
         window.location.reload();
     });
