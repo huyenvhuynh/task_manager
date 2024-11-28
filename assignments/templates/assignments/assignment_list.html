@@ -17,133 +17,101 @@
     {% endif %}
 
     {%if assignments %}
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Due Date</th>
-                    <th>Course</th>
-                    <th>Assignment</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for assignment in assignments|dictsort:"due_date" %}
-                <tr data-bs-toggle="tooltip" 
-                    data-bs-placement="top" 
-                    title="{{ assignment.description }}"
-                    style="cursor: pointer"
-                    onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
-                    <td>{{ assignment.due_date|date:"M d, Y" }}</td>
-                    <td>{{ assignment.course.full_name }}</td>
-                    <td>{{ assignment.title }}</td>
-                    <td class="text-center">
-                        <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
-                            {% csrf_token %}
-                            <input 
-                                type="checkbox" 
-                                onChange="this.form.submit()"
-                                {% if assignment in user.profile.completed_assignments.all %}checked{% endif %}
-                            >
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">In Progress Assignments</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive scrollable-card-content">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Due Date</th>
+                            <th>Course</th>
+                            <th>Assignment</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments|dictsort:"due_date" %}
+                        <tr data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="{{ assignment.description }}"
+                            style="cursor: pointer"
+                            onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
+                            <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                            <td>{{ assignment.course.full_name }}</td>
+                            <td>{{ assignment.title }}</td>
+                            <td class="text-center">
+                                <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
+                                    {% csrf_token %}
+                                    <input 
+                                        type="checkbox" 
+                                        onChange="this.form.submit()"
+                                        {% if assignment in user.profile.completed_assignments.all %}checked{% endif %}
+                                    >
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <h3 class="mt-4">Completed Assignments</h3>
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Due Date</th>
-                    <th>Course</th>
-                    <th>Assignment</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for assignment in user.profile.completed_assignments.all|dictsort:"due_date" %}
-                <tr data-bs-toggle="tooltip" 
-                data-bs-placement="top" 
-                title="{{ assignment.description }}"
-                style="cursor: pointer"
-                onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
-                <td>{{ assignment.due_date|date:"M d, Y" }}</td>
-                <td>{{ assignment.course.full_name }}</td>
-                <td>{{ assignment.title }}</td>
-                <td class="text-center">
-                    <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
-                        {% csrf_token %}
-                            <input 
-                                type="checkbox" 
-                                onChange="this.form.submit()"
-                                checked
-                            >
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="card">
+        <div class="card-header" role="button" data-bs-toggle="collapse" data-bs-target="#completedAssignments" aria-expanded="false">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Completed Assignments</h3>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div id="completedAssignments" class="collapse">
+            <div class="card-body p-0">
+                <div class="table-responsive scrollable-card-content">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Due Date</th>
+                                <th>Course</th>
+                                <th>Assignment</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in user.profile.completed_assignments.all|dictsort:"due_date" %}
+                            <tr data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            title="{{ assignment.description }}"
+                            style="cursor: pointer"
+                            onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
+                            <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                            <td>{{ assignment.course.full_name }}</td>
+                            <td>{{ assignment.title }}</td>
+                            <td class="text-center">
+                                <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
+                                    {% csrf_token %}
+                                        <input 
+                                            type="checkbox" 
+                                            onChange="this.form.submit()"
+                                            checked
+                                        >
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
     
     {% endif %}
 
     
-    <!-- {% if assignments %}
-    <ul class="list-group">
-        {% for assignment in assignments %}
-        <li class="list-group-item">
-            <div class="d-flex justify-content-between align-items-start">
-                <h5>{{ assignment.title }}</h5>
-                <span class="badge bg-primary">{{ assignment.course.full_name }}</span>
-            </div>
-            <p>{{ assignment.description }}</p>
-            <p>Due Date: {{ assignment.due_date }}</p>
-            <p>Uploaded At: {{ assignment.uploaded_at }}</p>
-            
-            {% if assignment.file_upload %}
-            <p>
-                File:
-                <embed src="{{ assignment.file_upload.url }}" width="800" height="1000" style="margin-left: auto; margin-right: auto; display: block;">
-            </p>
-            
-            {% if assignment.keywords %}
-            <div class="keywords">
-                <strong>Keywords:</strong>
-                {% for keyword in assignment.keyword_list %}
-                <span class="keyword-tag">{{ keyword }}</span>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p>No keywords added.</p>
-            {% endif %}
-            {% else %}
-            <p>No file uploaded.</p>
-            {% endif %}
 
-            <div>
-                <a href="{% url 'assignments:edit_assignment' assignment.id %}"
-                    class="btn btn-secondary btn-sm">View and Edit</a>
-                {% if assignment.user == user %}
-                <form action="{% url 'assignments:delete_assignment' assignment.id %}"
-                      method="post"
-                      style="display: inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                </form>
-                {% endif %}
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>No assignments found.</p>
-    {% endif %}
-</div> -->
 
 <!-- Add Assignment Modal -->
 {% if user.is_authenticated and user.profile.role == 'user' %}
@@ -251,6 +219,44 @@
 .list-group-item > div:last-child {
     margin-top: 15px;
 }
+
+.card-header[role="button"] {
+    cursor: pointer;
+}
+
+.chevron {
+    font-size: 1.2em;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+/* This will rotate the chevron when the collapse is open */
+#completedAssignments.show + .card-header .chevron {
+    transform: rotate(180deg);
+}
+
+.scrollable-card-content {
+    max-height: 400px; /* approximately 10 rows */
+    overflow-y: auto;
+}
+
+/* Optional: Style the scrollbar for webkit browsers */
+.scrollable-card-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 </style>
 
 {% endblock %}
@@ -354,5 +360,19 @@
             keywordsToggleIcon.textContent = "Add File Meta Data ▼";
         }
     }
+
+    //collapse arrow rotation
+    document.addEventListener('DOMContentLoaded', function() {
+        const completedSection = document.getElementById('completedAssignments');
+        const chevron = document.querySelector('.chevron');
+        
+        completedSection.addEventListener('show.bs.collapse', function () {
+            chevron.style.transform = 'rotate(180deg)';
+        });
+        
+        completedSection.addEventListener('hide.bs.collapse', function () {
+            chevron.style.transform = 'rotate(0deg)';
+        });
+    });
 </script>
 {% endblock %}
