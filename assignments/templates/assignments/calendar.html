@@ -44,6 +44,12 @@
       </div>
     </div>
 
+    <input type="hidden" id="assignments-data" value='{{ assignments_json|safe }}'>
+
+    <!-- <script>
+      console.log("Raw assignments data:", document.getElementById('assignments-data').value);
+    </script> -->
+
     <script>
       class Calendar {
         constructor() {
@@ -54,6 +60,17 @@
           this.isMonthView = true;
           this.periodElement = document.getElementById('currentPeriod');
           this.calendarBody = document.getElementById('calendarBody');
+          
+          // Initialize assignments with better error handling
+          try {
+            const rawData = document.getElementById('assignments-data').value;
+            console.log("Attempting to parse:", rawData);
+            this.assignments = JSON.parse(rawData);
+            console.log("Parsed assignments:", this.assignments);
+          } catch (e) {
+            console.error("Error parsing assignments data:", e);
+            this.assignments = [];
+          }
           
           this.initializeCalendar();
           this.addEventListeners();
@@ -149,12 +166,50 @@
               } else if (date > daysInMonth) {
                 break;
               } else {
-                cell.innerHTML = date;
-                if (date === new Date().getDate() && 
-                    this.currentYear === new Date().getFullYear() && 
-                    this.currentMonth === new Date().getMonth()) {
-                  cell.classList.add('bg-primary', 'text-white');
+                cell.innerHTML = `<div class="date-number">${date}</div>`;
+                
+                // Find assignments for this date
+                const currentDate = new Date(this.currentYear, this.currentMonth, date);
+                const formattedCurrentDate = currentDate.toISOString().split('T')[0];
+                
+                const assignmentsForDay = this.assignments.filter(assignment => {
+                  return assignment.due_date === formattedCurrentDate;
+                });
+
+                // Add assignments to the cell
+                if (assignmentsForDay.length > 0) {
+                  const assignmentList = document.createElement('div');
+                  assignmentList.classList.add('assignment-list');
+                  
+                  assignmentsForDay.forEach(assignment => {
+                    const assignmentEl = document.createElement('div');
+                    assignmentEl.classList.add('assignment-item');
+                    // Make assignment clickable
+                    assignmentEl.onclick = (e) => {
+                      e.stopPropagation(); // Prevent event bubbling
+                      window.location.href = `/assignments/edit/${assignment.id}`;
+                    };
+                    // Add tooltip with description if available
+                    if (assignment.description) {
+                      assignmentEl.setAttribute('data-bs-toggle', 'tooltip');
+                      assignmentEl.setAttribute('data-bs-placement', 'top');
+                      assignmentEl.setAttribute('title', assignment.description);
+                    }
+                    assignmentEl.innerHTML = `<span class="assignment-title">${assignment.title}</span>`;
+                    assignmentList.appendChild(assignmentEl);
+                  });
+                  
+                  cell.appendChild(assignmentList);
                 }
+
+                // Highlight today
+                const today = new Date();
+                if (date === today.getDate() && 
+                    this.currentYear === today.getFullYear() && 
+                    this.currentMonth === today.getMonth()) {
+                  cell.classList.add('today');
+                }
+                
                 date++;
               }
               row.appendChild(cell);
@@ -180,21 +235,68 @@
             
             const cell = document.createElement('td');
             cell.classList.add('calendar-day');
-            cell.innerHTML = currentDate.getDate();
             
+            // Add date number
+            cell.innerHTML = `<div class="date-number">${currentDate.getDate()}</div>`;
+            
+            // Find assignments for this date
+            const formattedCurrentDate = currentDate.toISOString().split('T')[0];
+            const assignmentsForDay = this.assignments.filter(assignment => {
+              return assignment.due_date === formattedCurrentDate;
+            });
+
+            // Add assignments to the cell
+            if (assignmentsForDay.length > 0) {
+              const assignmentList = document.createElement('div');
+              assignmentList.classList.add('assignment-list');
+              
+              assignmentsForDay.forEach(assignment => {
+                const assignmentEl = document.createElement('div');
+                assignmentEl.classList.add('assignment-item');
+                // Make assignment clickable
+                assignmentEl.onclick = (e) => {
+                  e.stopPropagation(); // Prevent event bubbling
+                  window.location.href = `/assignments/edit/${assignment.id}`;
+                };
+                // Add tooltip with description if available
+                if (assignment.description) {
+                  assignmentEl.setAttribute('data-bs-toggle', 'tooltip');
+                  assignmentEl.setAttribute('data-bs-placement', 'top');
+                  assignmentEl.setAttribute('title', assignment.description);
+                }
+                assignmentEl.innerHTML = `<span class="assignment-title">${assignment.title}</span>`;
+                assignmentList.appendChild(assignmentEl);
+              });
+              
+              cell.appendChild(assignmentList);
+            }
+            
+            // Highlight today
             if (currentDate.toDateString() === new Date().toDateString()) {
-              cell.classList.add('bg-primary', 'text-white');
+              cell.classList.add('today');
             }
             
             row.appendChild(cell);
           }
           this.calendarBody.appendChild(row);
+
+          // Initialize tooltips for new elements
+          var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+          var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+          });
         }
       }
 
       document.addEventListener('DOMContentLoaded', () => {
         new Calendar();
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
       });
+
     </script>
 
     <style>
@@ -203,13 +305,46 @@
         margin: 0 auto;
       }
       .calendar-day {
-        height: 80px;
+        height: 120px;
         vertical-align: top;
         padding: 8px;
+        position: relative;
+        width: 14.28%; /* Equal width for all 7 days */
       }
       .calendar-month-year {
         font-size: 1.5rem;
         font-weight: bold;
+      }
+      .date-number {
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+      .assignment-list {
+        font-size: 0.8em;
+      }
+      .assignment-item {
+        background-color: #e3f2fd;
+        margin: 2px 0;
+        padding: 2px 4px;
+        border-radius: 3px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .assignment-item:hover {
+        background-color: #bbdefb;
+      }
+      .assignment-title {
+        color: #1976d2;
+      }
+      .today {
+        background-color: #e8f5e9;
+      }
+      /* Make week view cells taller to accommodate more assignments */
+      tr:only-child .calendar-day {
+        height: 300px;
       }
     </style>
   

@@ -19,6 +19,8 @@ from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from courses.models import Course
 from .models import Assignment
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 def home(request):
@@ -257,7 +259,31 @@ def calendar(request):
     Returns:
         HttpResponse: Rendered calendar page
     """
-    return render(request, 'assignments/calendar.html', {})
+    user_courses = request.user.profile.courses.all()
+    assignments = Assignment.objects.filter(course__in=user_courses)
+    
+    # Prepare assignments data for JavaScript
+    assignments_data = []
+    for assignment in assignments:
+        assignments_data.append({
+            'title': str(assignment.title),
+            'due_date': assignment.due_date.strftime('%Y-%m-%d') if assignment.due_date else None,
+            'id': str(assignment.id)  # Convert to string to ensure serialization
+        })
+    
+    try:
+        assignments_json = json.dumps(assignments_data)
+        # Debug print
+        print("Generated JSON:", assignments_json)
+    except Exception as e:
+        print("JSON encoding error:", str(e))
+        assignments_json = '[]'  # Fallback to empty array if encoding fails
+
+    return render(request, 'assignments/calendar.html', {
+        'assignments': assignments,
+        'assignments_json': assignments_json,
+        'courses': user_courses
+    })
 
 # allow assignments to be marked as completed
 @login_required
