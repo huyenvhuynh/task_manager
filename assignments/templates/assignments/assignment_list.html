@@ -174,9 +174,13 @@
                                class="form-control" 
                                id="due_date" 
                                name="due_date" 
-                               required 
-                               min="{{ now|date:'Y-m-d\TH:i' }}" />
+                               required />
+                        <div id="due_date_error" class="text-danger" style="display: none;">
+                            Please enter a valid date that is after today with a 4-digit year.
+                        </div>
                     </div>
+                                      
+                                                                                                                 
                     <div class="mb-3">
                         <label for="course" class="form-label">Course</label>
                         <select class="form-control" id="course" name="course" required>
@@ -253,6 +257,43 @@
 
 {% block scripts %}
 <script>
+    // ensuring valid due date
+    document.addEventListener('DOMContentLoaded', () => {
+        const dueDateInput = document.getElementById('due_date');
+        const errorDiv = document.getElementById('due_date_error');
+
+        // Set today's date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        function isValidDate(dateString) {
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(dateString)) return false;
+
+            const [year, month, day] = dateString.split('-');
+            if (year.length !== 4) return false; // year must be exactly 4 digits
+
+            const date = new Date(dateString);
+            return !isNaN(date.getTime()); 
+        }
+
+        // validate the date on input
+        dueDateInput.addEventListener('input', () => {
+            const inputValue = dueDateInput.value; 
+            const inputDate = new Date(inputValue); 
+
+            // Check if the date is valid, has a 4-digit year, and is after today
+            if (!isValidDate(inputValue) || inputDate <= today) {
+                errorDiv.style.display = 'block'; //error message
+                dueDateInput.setCustomValidity('Please enter a valid date'); // prevent form submission
+            } else {
+                errorDiv.style.display = 'none'; 
+                dueDateInput.setCustomValidity(''); 
+            }
+        });
+    });
+
+
+
     // Initialize tooltips; needed to view assignment description on hover
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
