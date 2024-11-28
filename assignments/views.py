@@ -246,7 +246,7 @@ def file_search(request):
         'courses': user_courses
     })
 
-
+@login_required
 def calendar(request):
     """
     Display the calendar view.

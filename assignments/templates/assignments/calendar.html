@@ -3,10 +3,225 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h1>Calender</h1>
+  <h1>Calendar</h1>
 
   <body>
-    <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FNew_York&showPrint=0&src=YzliYzI4OGI1NGRkZTIzYjYxYzFkM2VhODQ5MzFhNmEyMDExMmU2ZWVkYzYyOTJkODYxMTI0ZTU3YTQ3Nzk5YUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&color=%23E67C73&color=%230B8043" style="border:solid 1px #777" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+    <div class="calendar-container">
+      <div class="row">
+        <div class="col-md-12">
+          <!-- View Toggle -->
+          <div class="mb-3">
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-primary active" id="monthView">Month</button>
+              <button class="btn btn-outline-primary" id="weekView">Week</button>
+            </div>
+          </div>
+
+          <!-- Calendar Navigation -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <button class="btn btn-outline-primary" id="prevBtn">&lt; Previous</button>
+            <h3 class="calendar-month-year mb-0" id="currentPeriod"></h3>
+            <button class="btn btn-outline-primary" id="nextBtn">Next &gt;</button>
+          </div>
+
+          <!-- Calendar Grid -->
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Sun</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+              </tr>
+            </thead>
+            <tbody id="calendarBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      class Calendar {
+        constructor() {
+          this.date = new Date();
+          this.currentMonth = this.date.getMonth();
+          this.currentYear = this.date.getFullYear();
+          this.currentView = 'month';
+          this.currentWeek = this.getWeekNumber(this.date);
+          
+          this.periodElement = document.getElementById('currentPeriod');
+          this.calendarBody = document.getElementById('calendarBody');
+          
+          this.initializeCalendar();
+          this.addEventListeners();
+        }
+
+        initializeCalendar() {
+          this.showCalendar();
+        }
+
+        addEventListeners() {
+          document.getElementById('prevBtn').addEventListener('click', () => {
+            if (this.currentView === 'month') {
+              this.currentYear = (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
+              this.currentMonth = (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
+            } else {
+              let prevWeek = new Date(this.date);
+              prevWeek.setDate(prevWeek.getDate() - 7);
+              this.date = prevWeek;
+              this.currentMonth = prevWeek.getMonth();
+              this.currentYear = prevWeek.getFullYear();
+              this.currentWeek = this.getWeekNumber(prevWeek);
+            }
+            this.showCalendar();
+          });
+
+          document.getElementById('nextBtn').addEventListener('click', () => {
+            if (this.currentView === 'month') {
+              this.currentYear = (this.currentMonth === 11) ? this.currentYear + 1 : this.currentYear;
+              this.currentMonth = (this.currentMonth + 1) % 12;
+            } else {
+              let nextWeek = new Date(this.date);
+              nextWeek.setDate(nextWeek.getDate() + 7);
+              this.date = nextWeek;
+              this.currentMonth = nextWeek.getMonth();
+              this.currentYear = nextWeek.getFullYear();
+              this.currentWeek = this.getWeekNumber(nextWeek);
+            }
+            this.showCalendar();
+          });
+
+          document.getElementById('monthView').addEventListener('click', (e) => {
+            this.currentView = 'month';
+            this.toggleActiveView(e.target);
+            this.showCalendar();
+          });
+
+          document.getElementById('weekView').addEventListener('click', (e) => {
+            this.currentView = 'week';
+            this.toggleActiveView(e.target);
+            this.showCalendar();
+          });
+        }
+
+        toggleActiveView(clickedBtn) {
+          document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          clickedBtn.classList.add('active');
+        }
+
+        getWeekNumber(d) {
+          d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+          d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+          const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+          return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        showCalendar() {
+          if (this.currentView === 'month') {
+            this.showMonthView();
+          } else {
+            this.showWeekView();
+          }
+        }
+
+        showMonthView() {
+          const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
+          const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+          const months = ["January", "February", "March", "April", "May", "June",
+                         "July", "August", "September", "October", "November", "December"];
+
+          this.periodElement.innerHTML = `${months[this.currentMonth]} ${this.currentYear}`;
+          this.calendarBody.innerHTML = '';
+
+          let date = 1;
+          for (let i = 0; i < 6; i++) {
+            const row = document.createElement('tr');
+            
+            for (let j = 0; j < 7; j++) {
+              const cell = document.createElement('td');
+              cell.classList.add('calendar-day');
+              
+              if (i === 0 && j < firstDay) {
+                cell.innerHTML = "";
+              } else if (date > daysInMonth) {
+                break;
+              } else {
+                cell.innerHTML = date;
+                if (date === new Date().getDate() && 
+                    this.currentYear === new Date().getFullYear() && 
+                    this.currentMonth === new Date().getMonth()) {
+                  cell.classList.add('bg-primary', 'text-white');
+                }
+                date++;
+              }
+              row.appendChild(cell);
+            }
+            this.calendarBody.appendChild(row);
+          }
+        }
+
+        showWeekView() {
+          const weekStart = new Date(this.date);
+          weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+          
+          const months = ["January", "February", "March", "April", "May", "June",
+                         "July", "August", "September", "October", "November", "December"];
+
+          this.periodElement.innerHTML = `Week of ${months[weekStart.getMonth()]} ${weekStart.getDate()}, ${weekStart.getFullYear()}`;
+          this.calendarBody.innerHTML = '';
+
+          const row = document.createElement('tr');
+          for (let i = 0; i < 7; i++) {
+            const cell = document.createElement('td');
+            cell.classList.add('calendar-day');
+            
+            const currentDate = new Date(weekStart);
+            currentDate.setDate(weekStart.getDate() + i);
+            
+            cell.innerHTML = currentDate.getDate();
+            
+            if (currentDate.toDateString() === new Date().toDateString()) {
+              cell.classList.add('bg-primary', 'text-white');
+            }
+            
+            row.appendChild(cell);
+          }
+          this.calendarBody.appendChild(row);
+        }
+      }
+
+      // Initialize calendar when DOM is loaded
+      document.addEventListener('DOMContentLoaded', () => {
+        new Calendar();
+      });
+    </script>
+
+    <style>
+      .calendar-container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .calendar-day {
+        height: 80px;
+        vertical-align: top;
+        padding: 8px;
+      }
+      .calendar-month-year {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+      .btn-group .btn.active {
+        background-color: #007bff;
+        color: white;
+      }
+    </style>
+  
   </body>
 </div>
 
