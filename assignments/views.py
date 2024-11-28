@@ -260,24 +260,21 @@ def calendar(request):
         HttpResponse: Rendered calendar page
     """
     user_courses = request.user.profile.courses.all()
-    assignments = Assignment.objects.filter(course__in=user_courses)
+    # Filter out completed assignments using exclude()
+    assignments = Assignment.objects.filter(course__in=user_courses).exclude(
+        completed_by=request.user.profile
+    )
     
-    # Prepare assignments data for JavaScript
     assignments_data = []
     for assignment in assignments:
         assignments_data.append({
             'title': str(assignment.title),
-            'due_date': assignment.due_date.strftime('%Y-%m-%d') if assignment.due_date else None,
-            'id': str(assignment.id)  # Convert to string to ensure serialization
+            'due_date': assignment.due_date.strftime('%Y-%m-%d'),
+            'id': str(assignment.id),
+            'description': str(assignment.description)
         })
     
-    try:
-        assignments_json = json.dumps(assignments_data)
-        # Debug print
-        print("Generated JSON:", assignments_json)
-    except Exception as e:
-        print("JSON encoding error:", str(e))
-        assignments_json = '[]'  # Fallback to empty array if encoding fails
+    assignments_json = json.dumps(assignments_data)
 
     return render(request, 'assignments/calendar.html', {
         'assignments': assignments,
