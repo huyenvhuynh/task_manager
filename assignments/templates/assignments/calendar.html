@@ -12,8 +12,8 @@
           <!-- View Toggle -->
           <div class="mb-3">
             <div class="btn-group" role="group">
-              <button class="btn btn-outline-primary active" id="monthView">Month</button>
-              <button class="btn btn-outline-primary" id="weekView">Week</button>
+              <button class="btn btn-outline-primary active" id="monthView">Month View</button>
+              <button class="btn btn-outline-primary" id="weekView">Week View</button>
             </div>
           </div>
 
@@ -50,14 +50,19 @@
           this.date = new Date();
           this.currentMonth = this.date.getMonth();
           this.currentYear = this.date.getFullYear();
-          this.currentView = 'month';
           this.currentWeek = this.getWeekNumber(this.date);
-          
+          this.isMonthView = true;
           this.periodElement = document.getElementById('currentPeriod');
           this.calendarBody = document.getElementById('calendarBody');
           
           this.initializeCalendar();
           this.addEventListeners();
+        }
+
+        getWeekNumber(date) {
+          const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+          const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+          return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
         }
 
         initializeCalendar() {
@@ -66,64 +71,56 @@
 
         addEventListeners() {
           document.getElementById('prevBtn').addEventListener('click', () => {
-            if (this.currentView === 'month') {
+            if (this.isMonthView) {
               this.currentYear = (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
               this.currentMonth = (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
             } else {
-              let prevWeek = new Date(this.date);
+              const prevWeek = new Date(this.date);
               prevWeek.setDate(prevWeek.getDate() - 7);
               this.date = prevWeek;
-              this.currentMonth = prevWeek.getMonth();
-              this.currentYear = prevWeek.getFullYear();
-              this.currentWeek = this.getWeekNumber(prevWeek);
+              this.currentWeek = this.getWeekNumber(this.date);
+              this.currentMonth = this.date.getMonth();
+              this.currentYear = this.date.getFullYear();
             }
             this.showCalendar();
           });
 
           document.getElementById('nextBtn').addEventListener('click', () => {
-            if (this.currentView === 'month') {
+            if (this.isMonthView) {
               this.currentYear = (this.currentMonth === 11) ? this.currentYear + 1 : this.currentYear;
               this.currentMonth = (this.currentMonth + 1) % 12;
             } else {
-              let nextWeek = new Date(this.date);
+              const nextWeek = new Date(this.date);
               nextWeek.setDate(nextWeek.getDate() + 7);
               this.date = nextWeek;
-              this.currentMonth = nextWeek.getMonth();
-              this.currentYear = nextWeek.getFullYear();
-              this.currentWeek = this.getWeekNumber(nextWeek);
+              this.currentWeek = this.getWeekNumber(this.date);
+              this.currentMonth = this.date.getMonth();
+              this.currentYear = this.date.getFullYear();
             }
             this.showCalendar();
           });
 
           document.getElementById('monthView').addEventListener('click', (e) => {
-            this.currentView = 'month';
-            this.toggleActiveView(e.target);
-            this.showCalendar();
+            if (!this.isMonthView) {
+              this.isMonthView = true;
+              e.target.classList.add('active');
+              document.getElementById('weekView').classList.remove('active');
+              this.showCalendar();
+            }
           });
 
           document.getElementById('weekView').addEventListener('click', (e) => {
-            this.currentView = 'week';
-            this.toggleActiveView(e.target);
-            this.showCalendar();
+            if (this.isMonthView) {
+              this.isMonthView = false;
+              e.target.classList.add('active');
+              document.getElementById('monthView').classList.remove('active');
+              this.showCalendar();
+            }
           });
-        }
-
-        toggleActiveView(clickedBtn) {
-          document.querySelectorAll('.btn-group .btn').forEach(btn => {
-            btn.classList.remove('active');
-          });
-          clickedBtn.classList.add('active');
-        }
-
-        getWeekNumber(d) {
-          d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-          d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-          const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-          return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
 
         showCalendar() {
-          if (this.currentView === 'month') {
+          if (this.isMonthView) {
             this.showMonthView();
           } else {
             this.showWeekView();
@@ -167,23 +164,22 @@
         }
 
         showWeekView() {
-          const weekStart = new Date(this.date);
-          weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+          const startOfWeek = new Date(this.date);
+          startOfWeek.setDate(this.date.getDate() - this.date.getDay());
           
           const months = ["January", "February", "March", "April", "May", "June",
                          "July", "August", "September", "October", "November", "December"];
 
-          this.periodElement.innerHTML = `Week of ${months[weekStart.getMonth()]} ${weekStart.getDate()}, ${weekStart.getFullYear()}`;
+          this.periodElement.innerHTML = `${months[this.currentMonth]} ${this.currentYear}`;
           this.calendarBody.innerHTML = '';
 
           const row = document.createElement('tr');
           for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(startOfWeek);
+            currentDate.setDate(startOfWeek.getDate() + i);
+            
             const cell = document.createElement('td');
             cell.classList.add('calendar-day');
-            
-            const currentDate = new Date(weekStart);
-            currentDate.setDate(weekStart.getDate() + i);
-            
             cell.innerHTML = currentDate.getDate();
             
             if (currentDate.toDateString() === new Date().toDateString()) {
@@ -196,7 +192,6 @@
         }
       }
 
-      // Initialize calendar when DOM is loaded
       document.addEventListener('DOMContentLoaded', () => {
         new Calendar();
       });
@@ -215,10 +210,6 @@
       .calendar-month-year {
         font-size: 1.5rem;
         font-weight: bold;
-      }
-      .btn-group .btn.active {
-        background-color: #007bff;
-        color: white;
       }
     </style>
   
