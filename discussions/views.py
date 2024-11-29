@@ -4,7 +4,6 @@ from django.http import HttpResponseBadRequest
 from .models import Discussion, Comment
 from courses.models import Course
 
-@login_required
 def discussion_list(request):
     """
     Display a list of discussions for courses the user is enrolled in.
@@ -18,8 +17,12 @@ def discussion_list(request):
     Returns:
         HttpResponse: The rendered discussion list template with discussions and user's courses.
     """
-    user_courses = request.user.profile.courses.all()
-    selected_course = request.GET.get('course')
+    if  request.user.is_authenticated:
+        user_courses = request.user.profile.courses.all()
+        selected_course = request.GET.get('course')
+    else:
+        user_courses = Course.objects.all()
+        selected_course = request.GET.get('course')
 
     # Base queryset for filtering discussions
     discussions = Discussion.objects.filter(course__in=user_courses)

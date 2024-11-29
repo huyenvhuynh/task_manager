@@ -14,8 +14,8 @@
     <!-- Course Filter Dropdown -->
     <div class="mb-4">
         <select class="form-select" id="courseFilter" onchange="filterDiscussions()">
-            <option value="">All My Courses</option>
-            {% for course in user.profile.courses.all %}
+            <option value="">All {% if user.is_authenticated %}My{% endif %} Courses</option>
+            {% for course in courses %}
             <option value="{{ course.id }}" {% if selected_course|stringformat:"s" == course.id|stringformat:"s" %}selected{% endif %}>
                 {{ course.course_number }} - {{ course.course_name }}
             </option>

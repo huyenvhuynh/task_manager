@@ -47,7 +47,6 @@ def create_course_group(request):
     return render(request, 'courses/create_course.html', {'form': form})
 
 
-@login_required
 def course_detail(request, pk):
     """
     Display detailed information about a specific course.
