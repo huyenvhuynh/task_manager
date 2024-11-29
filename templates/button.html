@@ -1,0 +1,40 @@
+
+<button 
+    type="{{ type|default:'button' }}"
+    class="btn btn-{{ variant|default:'purple' }} {% if size %}btn-{{ size }}{% endif %} {% if additional_classes %}{{ additional_classes }}{% endif %}"
+    {% if data_bs_toggle %}data-bs-toggle="{{ data_bs_toggle }}"{% endif %}
+    {% if data_bs_target %}data-bs-target="{{ data_bs_target }}"{% endif %}
+    {% if onclick %}onclick="{{ onclick }}"{% endif %}
+    {% if disabled %}disabled{% endif %}
+    {% if id %}id="{{ id }}"{% endif %}
+>
+    {{ text }}
+</button>
+
+<style>
+.btn-purple {
+    background-color: #673ab7;
+    border-color: #673ab7;
+}
+
+.btn-purple:hover {
+    background-color: #5e35b1;
+    border-color: #5e35b1;
+}
+
+.btn-primary {
+    background: linear-gradient(145deg, #3498db, #2980b9);
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3);
+}
+
+</style>
