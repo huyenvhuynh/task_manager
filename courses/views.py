@@ -116,3 +116,12 @@ def enroll_in_course(request, course_id):
     profile.save()
     
     return redirect('courses:course_list')
+
+
+@login_required
+def unenroll_from_course(request, course_id):
+    """Handle user unenrollment from a specific course."""
+    if request.method == 'POST':
+        course = get_object_or_404(Course, id=course_id)
+        request.user.profile.courses.remove(course)
+    return redirect('courses:course_list')

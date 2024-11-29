@@ -3,31 +3,105 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <div class="card">
+        <!-- Available Courses Card -->
+        <div class="card shadow-card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h3>Courses</h3>
+                <h3>Available Courses</h3>
                 <a href="{% url 'courses:create_course' %}" class="btn btn-primary">Create New Course</a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if courses %}
-                    <div class="list-group">
+                    <div class="list-group scrollable-card-content">
                         {% for course in courses %}
+                            {% if course not in user.profile.courses.all %}
+                            <div class="d-flex justify-content-between align-items-center list-group-item list-group-item-action">
+                                {{ course.full_name }}
+                                <form action="{% url 'courses:enroll_in_course' course.id %}" method="post" style="margin:0">
+                                    {% csrf_token %}
+                                    {% with text="Enroll" variant="secondary" type="submit" %}
+                                        {% include "button.html" %}
+                                    {% endwith %}
+                                </form>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center py-4">No courses available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Enrolled Courses Card -->
+        <div class="card shadow-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>My Courses</h3>
+            </div>
+            <div class="card-body p-0">
+                {% if user.profile.courses.all %}
+                    <div class="list-group scrollable-card-content">
+                        {% for course in user.profile.courses.all %}
                             <div class="d-flex justify-content-between align-items-center list-group-item list-group-item-action">
                                 <a href="{% url 'courses:course_detail' course.pk %}" class="text-decoration-none">
                                     {{ course.full_name }}
                                 </a>
-                                <!-- Enroll Button -->
-                                <a href="{% url 'courses:enroll_in_course' course.id %}" class="btn btn-sm btn-primary">
-                                    Enroll
-                                </a>
+                                <form action="{% url 'courses:unenroll_from_course' course.id %}" method="post" style="margin:0">
+                                    {% csrf_token %}
+                                    {% with text="Unenroll" variant="danger" type="submit" %}
+                                        {% include "button.html" %}
+                                    {% endwith %}
+                                </form>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="text-center">No courses available.</p>
+                    <p class="text-center py-4">You are not enrolled in any courses.</p>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.scrollable-card-content {
+    max-height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.scrollable-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.card-body {
+    padding: 0 !important;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+</style>
 {% endblock %}
