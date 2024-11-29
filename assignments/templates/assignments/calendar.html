@@ -2,13 +2,13 @@
 {% extends 'base.html' %} 
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-4">
   <body>
     <div class="calendar-container">
       <div class="row">
         <div class="col-md-12">
           <!-- View Toggle -->
-          <div class="mb-3">
+          <div class="mb-3 d-flex justify-content-center">
             <div class="btn-group" role="group">
               <button class="btn btn-outline-primary active" id="monthView">Month View</button>
               <button class="btn btn-outline-primary" id="weekView">Week View</button>
@@ -17,9 +17,9 @@
 
           <!-- Calendar Navigation -->
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <button class="btn btn-outline-primary" id="prevBtn">&lt; Previous</button>
+            {% include "button.html" with text="Previous" id="prevBtn" variant="primary" additional_classes="calendar-nav-btn" %}
             <h3 class="calendar-month-year mb-0" id="currentPeriod"></h3>
-            <button class="btn btn-outline-primary" id="nextBtn">Next &gt;</button>
+            {% include "button.html" with text="Next" id="nextBtn" variant="primary" additional_classes="calendar-nav-btn" %}
           </div>
 
           <!-- Calendar Grid -->
@@ -303,7 +303,7 @@
         margin: 0 auto;
       }
       .calendar-day {
-        height: 120px;
+        height: 100px;
         vertical-align: top;
         padding: 8px;
         position: relative;
@@ -342,7 +342,21 @@
       }
       /* Make week view cells taller to accommodate more assignments */
       tr:only-child .calendar-day {
-        height: 300px;
+        height: 250px;
+      }
+      /* Remove the outline styles since they're now handled by button.html */
+      .calendar-nav-btn {
+        min-width: 120px;  /* Optional: ensures consistent button width */
+      }
+      .btn-outline-primary {
+        color: #3498db;
+        border-color: #3498db;
+      }
+      
+      .btn-outline-primary:hover,
+      .btn-outline-primary.active {
+        background-color: #3498db;
+        border-color: #3498db;
       }
     </style>
   
