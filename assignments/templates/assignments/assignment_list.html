@@ -1,27 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-
-    <div class="row mb-3">
-        <!-- Add Assignment Button -->
-        <div class="col">
-            {% if user.is_authenticated and user.profile.role == 'user' %}
-                {% with text="Add Assignment" variant="primary" data_bs_toggle="modal" data_bs_target="#addAssignmentModal" %}
+<div class="container mt-3">
+    {% if user.profile.courses.all %}
+        <div class="row mb-3">
+            <!-- Add Assignment Button -->
+            <div class="col">
+                {% if user.is_authenticated and user.profile.role == 'user' %}
+                    {% with text="Add Assignment" variant="primary" data_bs_toggle="modal" data_bs_target="#addAssignmentModal" %}
+                        {% include "button.html" %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+            <!-- Course Filter -->
+            <div class="col-auto">
+                <select class="form-select" id="courseFilter">
+                    <option value="all">All Courses</option>
+                    {% for course in user.profile.courses.all %}
+                        <option value="{{ course.id }}">{{ course.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center my-5">
+            <h4 class="text-muted mb-4">You are not enrolled in any courses! Please enroll in a course to view your assignments.</h4>
+            <a href="{% url 'courses:course_list' %}">
+                {% with text="Enroll in Courses" variant="secondary" %}
                     {% include "button.html" %}
                 {% endwith %}
-            {% endif %}
+            </a>
         </div>
-        <!-- Course Filter -->
-        <div class="col-auto">
-            <select class="form-select" id="courseFilter">
-                <option value="all">All Courses</option>
-                {% for course in user.profile.courses.all %}
-                    <option value="{{ course.id }}">{{ course.full_name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
+    {% endif %}
 
     {% if assignments %}
     <div class="card mb-4">
