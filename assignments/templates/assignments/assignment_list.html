@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1>My Assignments</h1>
 
     <div class="row mb-3">
         <!-- Add Assignment Button -->
@@ -56,7 +55,7 @@
                                     {% csrf_token %}
                                     <input 
                                         type="checkbox" 
-                                        onChange="this.form.submit()"
+                                        onChange="handleCheckbox(event, this.form)"
                                         {% if assignment in user.profile.completed_assignments.all %}checked{% endif %}
                                     >
                                 </form>
@@ -107,7 +106,7 @@
                                     {% csrf_token %}
                                         <input 
                                             type="checkbox" 
-                                            onChange="this.form.submit()"
+                                            onChange="handleCheckbox(event, this.form)"
                                             checked
                                         >
                                     </form>
@@ -369,7 +368,36 @@ h1 {
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <script>
+    function fireConfetti() {
+        confetti({
+            particleCount: 150,
+            spread: 180,
+            origin: { y: 0.6 }
+        });
+    }
+
+    function handleCheckbox(event, form) {
+        // Only trigger confetti when checking the box (completing assignment)
+        if (!event.target.checked) {
+            form.submit();
+            return;
+        }
+        
+        // Prevent the default form submission
+        event.preventDefault();
+        
+        // Fire confetti
+        fireConfetti();
+        
+        // Submit the form after a short delay
+        setTimeout(() => {
+            form.submit();
+        }, 400);
+    }
+
     // ensuring valid due date
     document.addEventListener('DOMContentLoaded', () => {
         const dueDateInput = document.getElementById('due_date');
