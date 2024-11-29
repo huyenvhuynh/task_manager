@@ -4,8 +4,10 @@
 <div class="container mt-5">
     <!-- Back Button -->
     <div class="mb-4">
-        <a href="{% url 'discussions:discussion_list' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Discussions
+        <a href="{% url 'discussions:discussion_list' %}" class="me-2 text-decoration-none">
+            {% with text="Back to Discussions" variant="secondary" additional_classes="btn-grey" %}
+                {% include "button.html" %}
+            {% endwith %}
         </a>
     </div>
 

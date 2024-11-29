@@ -92,8 +92,14 @@
     </div>
     {% endif %}
 
-    <button type="submit" class="btn btn-primary">Save Changes</button>
+    {% include "button.html" with type="submit" variant="secondary" text="Save Changes" %}
   </form>
-  <a href="{% url 'assignments:assignment_list' %}" class="btn btn-secondary mt-3">Back to Assignments</a>
+  <div class="mt-2"></div>
+  
+  <a href="{% url 'assignments:assignment_list' %}" class="me-2 text-decoration-none">
+    {% with text="Back to Assignments" variant="secondary" additional_classes="btn-grey" %}
+      {% include "button.html" %}
+    {% endwith %}
+  </a>
 </div>
 {% endblock %}
