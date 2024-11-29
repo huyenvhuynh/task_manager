@@ -1,10 +1,13 @@
 {% extends 'base.html' %} {% block content %} {% load static %}
 <div class="container">
-    <div class="role-selection">
+    <div class="role-selection shadow-card">
       <h1>Please sign in to access this page</h1>
-      <a href="{% url 'users:sign_in' %}" class="btn btn-submit">sign in</a>
-
-</div>
+      <a href="{% url 'users:sign_in' %}" class="me-2 text-decoration-none">
+        {% with text="sign in" variant="secondary" additional_classes="btn-submit" %}
+          {% include "button.html" %}
+        {% endwith %}
+      </a>
+    </div>
 
   <style>
     .container {
