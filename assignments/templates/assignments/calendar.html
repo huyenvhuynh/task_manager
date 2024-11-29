@@ -2,11 +2,364 @@
 {% extends 'base.html' %} 
 
 {% block content %}
-<div class="container mt-5">
-  <h1>Calender</h1>
-
+<div class="container mt-4">
   <body>
-    <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FNew_York&showPrint=0&src=YzliYzI4OGI1NGRkZTIzYjYxYzFkM2VhODQ5MzFhNmEyMDExMmU2ZWVkYzYyOTJkODYxMTI0ZTU3YTQ3Nzk5YUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t&src=ZW4udXNhI2hvbGlkYXlAZ3JvdXAudi5jYWxlbmRhci5nb29nbGUuY29t&color=%23E67C73&color=%230B8043" style="border:solid 1px #777" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+    <div class="calendar-container">
+      <div class="row">
+        <div class="col-md-12">
+          <!-- View Toggle -->
+          <div class="mb-3 d-flex justify-content-center">
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-primary active" id="monthView">Month View</button>
+              <button class="btn btn-outline-primary" id="weekView">Week View</button>
+            </div>
+          </div>
+
+          <!-- Calendar Navigation -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            {% include "button.html" with text="Previous" id="prevBtn" variant="primary" additional_classes="calendar-nav-btn" %}
+            <h3 class="calendar-month-year mb-0" id="currentPeriod"></h3>
+            {% include "button.html" with text="Next" id="nextBtn" variant="primary" additional_classes="calendar-nav-btn" %}
+          </div>
+
+          <!-- Calendar Grid -->
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Sun</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+              </tr>
+            </thead>
+            <tbody id="calendarBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="assignments-data" value='{{ assignments_json|safe }}'>
+
+    <!-- <script>
+      console.log("Raw assignments data:", document.getElementById('assignments-data').value);
+    </script> -->
+
+    <script>
+      class Calendar {
+        constructor() {
+          this.date = new Date();
+          this.currentMonth = this.date.getMonth();
+          this.currentYear = this.date.getFullYear();
+          this.currentWeek = this.getWeekNumber(this.date);
+          this.isMonthView = true;
+          this.periodElement = document.getElementById('currentPeriod');
+          this.calendarBody = document.getElementById('calendarBody');
+          
+          // Initialize assignments with better error handling
+          try {
+            const rawData = document.getElementById('assignments-data').value;
+            console.log("Attempting to parse:", rawData);
+            this.assignments = JSON.parse(rawData);
+            console.log("Parsed assignments:", this.assignments);
+          } catch (e) {
+            console.error("Error parsing assignments data:", e);
+            this.assignments = [];
+          }
+          
+          this.initializeCalendar();
+          this.addEventListeners();
+        }
+
+        getWeekNumber(date) {
+          const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+          const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+          return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        }
+
+        initializeCalendar() {
+          this.showCalendar();
+        }
+
+        addEventListeners() {
+          document.getElementById('prevBtn').addEventListener('click', () => {
+            if (this.isMonthView) {
+              this.currentYear = (this.currentMonth === 0) ? this.currentYear - 1 : this.currentYear;
+              this.currentMonth = (this.currentMonth === 0) ? 11 : this.currentMonth - 1;
+            } else {
+              const prevWeek = new Date(this.date);
+              prevWeek.setDate(prevWeek.getDate() - 7);
+              this.date = prevWeek;
+              this.currentWeek = this.getWeekNumber(this.date);
+              this.currentMonth = this.date.getMonth();
+              this.currentYear = this.date.getFullYear();
+            }
+            this.showCalendar();
+          });
+
+          document.getElementById('nextBtn').addEventListener('click', () => {
+            if (this.isMonthView) {
+              this.currentYear = (this.currentMonth === 11) ? this.currentYear + 1 : this.currentYear;
+              this.currentMonth = (this.currentMonth + 1) % 12;
+            } else {
+              const nextWeek = new Date(this.date);
+              nextWeek.setDate(nextWeek.getDate() + 7);
+              this.date = nextWeek;
+              this.currentWeek = this.getWeekNumber(this.date);
+              this.currentMonth = this.date.getMonth();
+              this.currentYear = this.date.getFullYear();
+            }
+            this.showCalendar();
+          });
+
+          document.getElementById('monthView').addEventListener('click', (e) => {
+            if (!this.isMonthView) {
+              this.isMonthView = true;
+              e.target.classList.add('active');
+              document.getElementById('weekView').classList.remove('active');
+              this.showCalendar();
+            }
+          });
+
+          document.getElementById('weekView').addEventListener('click', (e) => {
+            if (this.isMonthView) {
+              this.isMonthView = false;
+              e.target.classList.add('active');
+              document.getElementById('monthView').classList.remove('active');
+              this.showCalendar();
+            }
+          });
+        }
+
+        showCalendar() {
+          if (this.isMonthView) {
+            this.showMonthView();
+          } else {
+            this.showWeekView();
+          }
+        }
+
+        showMonthView() {
+          const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
+          const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+          const months = ["January", "February", "March", "April", "May", "June",
+                         "July", "August", "September", "October", "November", "December"];
+
+          this.periodElement.innerHTML = `${months[this.currentMonth]} ${this.currentYear}`;
+          this.calendarBody.innerHTML = '';
+
+          let date = 1;
+          for (let i = 0; i < 6; i++) {
+            const row = document.createElement('tr');
+            
+            for (let j = 0; j < 7; j++) {
+              const cell = document.createElement('td');
+              cell.classList.add('calendar-day');
+              
+              if (i === 0 && j < firstDay) {
+                cell.innerHTML = "";
+              } else if (date > daysInMonth) {
+                break;
+              } else {
+                cell.innerHTML = `<div class="date-number">${date}</div>`;
+                
+                // Find assignments for this date
+                const currentDate = new Date(this.currentYear, this.currentMonth, date);
+                const formattedCurrentDate = currentDate.toISOString().split('T')[0];
+                
+                const assignmentsForDay = this.assignments.filter(assignment => {
+                  return assignment.due_date === formattedCurrentDate;
+                });
+
+                // Add assignments to the cell
+                if (assignmentsForDay.length > 0) {
+                  const assignmentList = document.createElement('div');
+                  assignmentList.classList.add('assignment-list');
+                  
+                  assignmentsForDay.forEach(assignment => {
+                    const assignmentEl = document.createElement('div');
+                    assignmentEl.classList.add('assignment-item');
+                    // Make assignment clickable
+                    assignmentEl.onclick = (e) => {
+                      e.stopPropagation(); // Prevent event bubbling
+                      window.location.href = `/assignments/edit/${assignment.id}`;
+                    };
+                    // Add tooltip with description if available
+                    if (assignment.description) {
+                      assignmentEl.setAttribute('data-bs-toggle', 'tooltip');
+                      assignmentEl.setAttribute('data-bs-placement', 'top');
+                      assignmentEl.setAttribute('title', assignment.description);
+                    }
+                    assignmentEl.innerHTML = `<span class="assignment-title">${assignment.title}</span>`;
+                    assignmentList.appendChild(assignmentEl);
+                  });
+                  
+                  cell.appendChild(assignmentList);
+                }
+
+                // Highlight today
+                const today = new Date();
+                if (date === today.getDate() && 
+                    this.currentYear === today.getFullYear() && 
+                    this.currentMonth === today.getMonth()) {
+                  cell.classList.add('today');
+                }
+                
+                date++;
+              }
+              row.appendChild(cell);
+            }
+            this.calendarBody.appendChild(row);
+          }
+        }
+
+        showWeekView() {
+          const startOfWeek = new Date(this.date);
+          startOfWeek.setDate(this.date.getDate() - this.date.getDay());
+          
+          const months = ["January", "February", "March", "April", "May", "June",
+                         "July", "August", "September", "October", "November", "December"];
+
+          this.periodElement.innerHTML = `${months[this.currentMonth]} ${this.currentYear}`;
+          this.calendarBody.innerHTML = '';
+
+          const row = document.createElement('tr');
+          for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(startOfWeek);
+            currentDate.setDate(startOfWeek.getDate() + i);
+            
+            const cell = document.createElement('td');
+            cell.classList.add('calendar-day');
+            
+            // Add date number
+            cell.innerHTML = `<div class="date-number">${currentDate.getDate()}</div>`;
+            
+            // Find assignments for this date
+            const formattedCurrentDate = currentDate.toISOString().split('T')[0];
+            const assignmentsForDay = this.assignments.filter(assignment => {
+              return assignment.due_date === formattedCurrentDate;
+            });
+
+            // Add assignments to the cell
+            if (assignmentsForDay.length > 0) {
+              const assignmentList = document.createElement('div');
+              assignmentList.classList.add('assignment-list');
+              
+              assignmentsForDay.forEach(assignment => {
+                const assignmentEl = document.createElement('div');
+                assignmentEl.classList.add('assignment-item');
+                // Make assignment clickable
+                assignmentEl.onclick = (e) => {
+                  e.stopPropagation(); // Prevent event bubbling
+                  window.location.href = `/assignments/edit/${assignment.id}`;
+                };
+                // Add tooltip with description if available
+                if (assignment.description) {
+                  assignmentEl.setAttribute('data-bs-toggle', 'tooltip');
+                  assignmentEl.setAttribute('data-bs-placement', 'top');
+                  assignmentEl.setAttribute('title', assignment.description);
+                }
+                assignmentEl.innerHTML = `<span class="assignment-title">${assignment.title}</span>`;
+                assignmentList.appendChild(assignmentEl);
+              });
+              
+              cell.appendChild(assignmentList);
+            }
+            
+            // Highlight today
+            if (currentDate.toDateString() === new Date().toDateString()) {
+              cell.classList.add('today');
+            }
+            
+            row.appendChild(cell);
+          }
+          this.calendarBody.appendChild(row);
+
+          // Initialize tooltips for new elements
+          var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+          var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+          });
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        new Calendar();
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+      });
+
+    </script>
+
+    <style>
+      .calendar-container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .calendar-day {
+        height: 100px;
+        vertical-align: top;
+        padding: 8px;
+        position: relative;
+        width: 14.28%; /* Equal width for all 7 days */
+      }
+      .calendar-month-year {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+      .date-number {
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+      .assignment-list {
+        font-size: 0.8em;
+      }
+      .assignment-item {
+        background-color: #e3f2fd;
+        margin: 2px 0;
+        padding: 2px 4px;
+        border-radius: 3px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .assignment-item:hover {
+        background-color: #bbdefb;
+      }
+      .assignment-title {
+        color: #1976d2;
+      }
+      .today {
+        background-color: #e8f5e9;
+      }
+      /* Make week view cells taller to accommodate more assignments */
+      tr:only-child .calendar-day {
+        height: 250px;
+      }
+      /* Remove the outline styles since they're now handled by button.html */
+      .calendar-nav-btn {
+        min-width: 120px;  /* Optional: ensures consistent button width */
+      }
+      .btn-outline-primary {
+        color: #3498db;
+        border-color: #3498db;
+      }
+      
+      .btn-outline-primary:hover,
+      .btn-outline-primary.active {
+        background-color: #3498db;
+        border-color: #3498db;
+      }
+    </style>
+  
   </body>
 </div>
 

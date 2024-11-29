@@ -47,7 +47,6 @@ def create_course_group(request):
     return render(request, 'courses/create_course.html', {'form': form})
 
 
-@login_required
 def course_detail(request, pk):
     """
     Display detailed information about a specific course.
@@ -115,4 +114,13 @@ def enroll_in_course(request, course_id):
     # Save changes to the profile
     profile.save()
     
+    return redirect('courses:course_list')
+
+
+@login_required
+def unenroll_from_course(request, course_id):
+    """Handle user unenrollment from a specific course."""
+    if request.method == 'POST':
+        course = get_object_or_404(Course, id=course_id)
+        request.user.profile.courses.remove(course)
     return redirect('courses:course_list')

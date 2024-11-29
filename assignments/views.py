@@ -19,6 +19,8 @@ from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from courses.models import Course
 from .models import Assignment
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 def home(request):
@@ -246,7 +248,7 @@ def file_search(request):
         'courses': user_courses
     })
 
-
+@login_required
 def calendar(request):
     """
     Display the calendar view.
@@ -257,7 +259,28 @@ def calendar(request):
     Returns:
         HttpResponse: Rendered calendar page
     """
-    return render(request, 'assignments/calendar.html', {})
+    user_courses = request.user.profile.courses.all()
+    # Filter out completed assignments using exclude()
+    assignments = Assignment.objects.filter(course__in=user_courses).exclude(
+        completed_by=request.user.profile
+    )
+    
+    assignments_data = []
+    for assignment in assignments:
+        assignments_data.append({
+            'title': str(assignment.title),
+            'due_date': assignment.due_date.strftime('%Y-%m-%d'),
+            'id': str(assignment.id),
+            'description': str(assignment.description)
+        })
+    
+    assignments_json = json.dumps(assignments_data)
+
+    return render(request, 'assignments/calendar.html', {
+        'assignments': assignments,
+        'assignments_json': assignments_json,
+        'courses': user_courses
+    })
 
 # allow assignments to be marked as completed
 @login_required

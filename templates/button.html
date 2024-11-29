@@ -1,0 +1,69 @@
+
+<button 
+    type="{{ type|default:'button' }}"
+    class="btn btn-{{ variant|default:'purple' }} {% if size %}btn-{{ size }}{% endif %} {% if additional_classes %}{{ additional_classes }}{% endif %}"
+    {% if data_bs_toggle %}data-bs-toggle="{{ data_bs_toggle }}"{% endif %}
+    {% if data_bs_target %}data-bs-target="{{ data_bs_target }}"{% endif %}
+    {% if onclick %}onclick="{{ onclick }}"{% endif %}
+    {% if disabled %}disabled{% endif %}
+    {% if id %}id="{{ id }}"{% endif %}
+>
+    {{ text }}
+</button>
+
+<style>
+
+.btn-primary {
+    /*     background: linear-gradient(145deg, #673ab7, #5e35b1); if we want to return to purple */
+    background: linear-gradient(145deg, #3498db, #2980b9); 
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(145deg, #5dade2, #7fb3d5);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(93, 173, 226, 0.2);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(145deg, #4a8dc2, #6ca1c4);
+    box-shadow: 0 4px 12px rgba(93, 173, 226, 0.2);
+}
+
+/* Red variant */
+.btn-secondary.btn-red {
+    background: linear-gradient(145deg, #e74c3c, #c0392b);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+}
+
+.btn-secondary.btn-red:hover {
+    background: linear-gradient(145deg, #c0392b, #a93226);
+    box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+}
+
+/* Grey variant */
+.btn-secondary.btn-grey {
+    background: linear-gradient(145deg, #95a5a6, #7f8c8d);
+    box-shadow: 0 4px 12px rgba(149, 165, 166, 0.2);
+}
+
+.btn-secondary.btn-grey:hover {
+    background: linear-gradient(145deg, #7f8c8d, #6b7778);
+    box-shadow: 0 6px 16px rgba(149, 165, 166, 0.3);
+}
+
+</style>

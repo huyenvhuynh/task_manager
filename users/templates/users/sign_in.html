@@ -19,7 +19,7 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-light bg-light fixed-top">
+    <!-- <nav class="navbar navbar-light bg-light fixed-top">
       <div class="container">
         <a class="navbar-brand" href="#">
           <img
@@ -30,7 +30,7 @@
           />
         </a>
       </div>
-    </nav>
+    </nav> -->
 
     <div class="login-container">
       <h1>Log In</h1>
@@ -64,9 +64,11 @@
       {% endif %}
 
       <div class="add_spacing">
-        <a href="{% url 'users:anonymous' %}" class="btn btn-primary"
-          >Continue without signing in</a
-        >
+        <a href="{% url 'users:anonymous' %}" class="text-decoration-none">
+          {% with text="Continue without signing in" variant="primary" %}
+            {% include "button.html" %}
+          {% endwith %}
+        </a>
       </div>
     </div>
   </body>
@@ -97,7 +99,7 @@ body {
 
 h1 {
   font-size: 1.8rem;
-  color: #673ab7;
+  color: #3498db;
   margin-bottom: 1.5rem;
 }
 

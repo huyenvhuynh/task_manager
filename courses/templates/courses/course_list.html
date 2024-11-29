@@ -1,33 +1,181 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3>Courses</h3>
-                <a href="{% url 'courses:create_course' %}" class="btn btn-primary">Create New Course</a>
-            </div>
-            <div class="card-body">
-                {% if courses %}
-                    <div class="list-group">
-                        {% for course in courses %}
-                            <div class="d-flex justify-content-between align-items-center list-group-item list-group-item-action">
-                                <a href="{% url 'courses:course_detail' course.pk %}" class="text-decoration-none">
-                                    {{ course.full_name }}
-                                </a>
-                                <!-- Enroll Button -->
-                                <a href="{% url 'courses:enroll_in_course' course.id %}" class="btn btn-sm btn-primary">
-                                    Enroll
-                                </a>
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-12">
+            <!-- Available Courses Card -->
+            <div class="card shadow-card mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3>Available Courses</h3>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'courses:create_course' %}" class="btn btn-primary">Create New Course</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                        {% if user.is_authenticated and user.profile.courses.all|length == courses|length %}
+                            <div class="text-center py-4 scrollable-card-content">
+                                <p class="mb-3">You're enrolled in all available courses! Click the "Create New Course" button above to create your own course.</p>
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p class="text-center">No courses available.</p>
-                {% endif %}
+                        {% else %}
+                            <div class="table-responsive scrollable-card-content">
+                                <div class="list-group">
+                                    {% for course in courses %}
+                                        {% if not user.is_authenticated or course not in user.profile.courses.all %}
+                                        <div class="d-flex justify-content-between align-items-center list-group-item list-group-item-action">
+                                            <a href="{% url 'courses:course_detail' course.pk %}" class="text-decoration-none">
+                                                {{ course.full_name }}
+                                            </a>
+                                            {% if user.is_authenticated %}
+                                            <form action="{% url 'courses:enroll_in_course' course.id %}" method="post" style="margin:0">
+                                                {% csrf_token %}
+                                                {% with text="Enroll" variant="secondary" type="submit" %}
+                                                    {% include "button.html" %}
+                                                {% endwith %}
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-center py-4">No courses available at the moment.</p>
+                    {% endif %}
+                </div>
             </div>
+
+            <!-- Enrolled Courses Card -->
+            {% if user.is_authenticated %}
+            <div class="card shadow-card">
+                <div class="" role="button" data-bs-toggle="collapse" data-bs-target="#myCourses" aria-expanded="false">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">My Courses</h3>
+                        <span class="chevron">▼</span>
+                    </div>
+                </div>
+                <div id="myCourses" class="collapse">
+                    <div class="card-body p-0">
+                        {% if user.profile.courses.all %}
+                            <div class="list-group scrollable-card-content">
+                                {% for course in user.profile.courses.all %}
+                                    <div class="d-flex justify-content-between align-items-center list-group-item list-group-item-action">
+                                        <a href="{% url 'courses:course_detail' course.pk %}" class="text-decoration-none">
+                                            {{ course.full_name }}
+                                        </a>
+                                        <form action="{% url 'courses:unenroll_from_course' course.id %}" method="post" style="margin:0">
+                                            {% csrf_token %}
+                                            {% with text="Unenroll" variant="danger" type="submit" %}
+                                                {% include "button.html" %}
+                                            {% endwith %}
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-center py-4">You are not enrolled in any courses.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<style>
+.scrollable-card-content {
+    height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.scrollable-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(145deg, #f8f9fa, #fff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.card-header h3 {
+    color: #2d3436;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.card-body {
+    padding: 1.25rem 1.5rem !important;
+}
+
+.list-group-item {
+    padding: 1rem 1.5rem;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.container {
+    max-width: 1140px;
+    padding: 2rem;
+}
+
+/* Add chevron styling */
+.chevron {
+    color: #3498db;
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+</style>
+
+{% block scripts %}
+<script>
+    // Add collapse arrow rotation
+    document.addEventListener('DOMContentLoaded', function() {
+        const myCoursesSection = document.getElementById('myCourses');
+        const chevron = document.querySelector('.chevron');
+        
+        myCoursesSection.addEventListener('show.bs.collapse', function () {
+            chevron.style.transform = 'rotate(180deg)';
+        });
+        
+        myCoursesSection.addEventListener('hide.bs.collapse', function () {
+            chevron.style.transform = 'rotate(0deg)';
+        });
+    });
+</script>
+{% endblock %}
 {% endblock %}
