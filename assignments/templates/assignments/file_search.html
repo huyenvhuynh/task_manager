@@ -7,7 +7,9 @@
   <div class="d-flex justify-content-end mb-3">
     <form action="" method="get" class="input-group">
       <input type="text" name="q" class="form-control" placeholder="Search files..." value="{{ request.GET.q|default:'' }}">
-      <button class="btn btn-primary" type="submit">Search</button>
+      {% with text="Search" variant="primary" type="submit" %}
+        {% include "button.html" %}
+      {% endwith %}
     </form>
   </div>
   <!-- List of Assignments -->
@@ -57,7 +59,9 @@
           style="display: inline"
         >
           {% csrf_token %}
-          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          {% with text="Delete" variant="secondary" type="submit" additional_classes="btn-red" %}
+            {% include "button.html" %}
+          {% endwith %}
         </form>
         {% endif %}
       </div>

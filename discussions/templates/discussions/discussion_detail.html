@@ -10,7 +10,7 @@
     </div>
 
     <!-- Discussion -->
-    <div class="card mb-4">
+    <div class="card mb-4 shadow-card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h1 class="card-title mb-0">{{ discussion.title }}</h1>
@@ -26,7 +26,7 @@
     </div>
 
     <!-- Comments Section -->
-    <div class="comments-section">
+    <div class="comments-section shadow-card">
         <h3 class="mb-4">Comments ({{ discussion.comments.count }})</h3>
         
         <!-- Add Comment Form -->
@@ -39,7 +39,10 @@
                         <label for="content" class="form-label">Add a comment</label>
                         <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                    
+                    {% with text="Post Comment" variant="primary" type="submit" %}
+                        {% include "button.html" %}
+                    {% endwith %}
                 </form>
             </div>
         </div>

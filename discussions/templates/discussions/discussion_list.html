@@ -5,9 +5,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Course Discussions</h1>
         {% if user.is_authenticated %}
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDiscussionModal">
-            Start New Discussion
-        </button>
+        {% with text="Start New Discussion" variant="primary" data_bs_toggle="modal" data_bs_target="#addDiscussionModal" %}
+                    {% include "button.html" %}
+        {% endwith %}
         {% endif %}
     </div>
 
@@ -26,7 +26,7 @@
     {% if discussions %}
     <div class="list-group">
         {% for discussion in discussions %}
-        <div class="list-group-item">
+        <div class="list-group-item shadow-card">
             <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
                     <a href="{% url 'discussions:discussion_detail' discussion.id %}" class="text-decoration-none">
