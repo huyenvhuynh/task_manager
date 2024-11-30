@@ -24,7 +24,19 @@ class CourseGroupForm(forms.ModelForm):
         return number
         
     def clean_course_name(self):  
-        name = self.cleaned_data['course_name']  
+        name = self.cleaned_data['course_name'] 
+        if len(name) >= 4: 
+             raise forms.ValidationError("Course name must be 4 characters or less")
         if not name.isalnum():
             raise forms.ValidationError("Course name must be alphanumeric")
         return name.upper()
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        course_name = cleaned_data.get('course_name')
+        course_number = cleaned_data.get('course_number')
+        if course_name and course_number:
+            full_name = f'{course_name} {course_number}'
+            if Course.objects.filter(full_name=full_name).exists():
+                raise forms.ValidationError(f"The course '{full_name}' already exists.")
+        return cleaned_data

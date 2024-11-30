@@ -13,16 +13,11 @@ class Course(models.Model):
     """
     course_number = models.BigIntegerField()
     course_name = models.CharField(max_length=200)
+    full_name = models.CharField(max_length=255, unique=True, default='')
 
-    @property
-    def full_name(self) -> str:
-        """
-        Return the full name of the course.
-
-        Returns:
-            str: The course name concatenated with the course number.
-        """
-        return f'{self.course_name} {self.course_number}'
+    def save(self, *args, **kwargs):
+        self.full_name = f'{self.course_name} {self.course_number}'
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         """
