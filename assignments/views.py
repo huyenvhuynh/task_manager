@@ -283,3 +283,19 @@ def toggle_complete(request, assignment_id):
         else:
             request.user.profile.completed_assignments.add(assignment)
     return redirect('assignments:assignment_list')
+
+@login_required
+def delete_file(request, assignment_id, file_id):
+    if request.method != 'POST':
+        return HttpResponseForbidden()
+        
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    # Check if user has permission to modify this assignment
+    if assignment.course not in request.user.profile.courses.all():
+        return HttpResponseForbidden()
+        
+    file = get_object_or_404(AssignmentFile, id=file_id, assignment=assignment)
+    file.delete()
+    
+    return redirect('assignments:edit_assignment', assignment_id=assignment_id)
