@@ -97,7 +97,7 @@
             <div class="card-body p-4">
               <div class="d-flex align-items-center mb-3">
                 <div class="icon-box bg-primary bg-opacity-10 rounded p-3 me-3 d-flex align-items-center justify-content-center">
-                  <i class="fas fa-graduation-cap text-primary"></i>
+                  <i class="fas fa-graduation-cap text-white"></i>
                 </div>
                 <h3 class="h5 mb-0">Course Integration</h3>
               </div>
@@ -111,7 +111,7 @@
             <div class="card-body p-4">
               <div class="d-flex align-items-center mb-3">
                 <div class="icon-box bg-primary bg-opacity-10 rounded p-3 me-3 d-flex align-items-center justify-content-center">
-                  <i class="fas fa-calendar-check text-primary"></i>
+                  <i class="fas fa-calendar-check text-white"></i>
                 </div>
                 <h3 class="h5 mb-0">Calendar View</h3>
               </div>
@@ -125,7 +125,7 @@
             <div class="card-body p-4">
               <div class="d-flex align-items-center mb-3">
                 <div class="icon-box bg-primary bg-opacity-10 rounded p-3 me-3 d-flex align-items-center justify-content-center">
-                  <i class="fas fa-hourglass-half text-primary"></i>
+                  <i class="fas fa-hourglass-half text-white"></i>
                 </div>
                 <h3 class="h5 mb-0">Deadline Tracking</h3>
               </div>
@@ -222,7 +222,7 @@
 
 <style>
 :root {
-  --primary-color: #0d6efd;
+  --primary-color: #3498db;
   --hover-transform: translateY(-5px);
   --transition-speed: 0.3s;
   --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
@@ -256,7 +256,7 @@
 
 /* Feature card specifics */
 .feature-card .rounded-circle {
-  background-color: var(--primary-color);
+  background: linear-gradient(145deg, #3498db, #2980b9);
 }
 
 /* Feature highlight specifics */
@@ -353,6 +353,14 @@
 .about-section {
   margin-bottom: 0; 
   padding-bottom: 0rem; 
+}
+
+.bg-primary {
+  background: linear-gradient(145deg, #3498db, #2980b9) !important;
+}
+
+.text-primary {
+  color: #3498db !important;
 }
 </style>
 {% endblock %}
