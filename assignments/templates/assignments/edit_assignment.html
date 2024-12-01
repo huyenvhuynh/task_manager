@@ -73,20 +73,22 @@
       </div>
     </div>
     <div class="card-body p-0 fixed-height-body">
-      {% if assignment.file_upload %}
+      {% if assignment.files.all %}
       <div class="list-group scrollable-card-content">
+        {% for file in assignment.files.all %}
         <div class="list-group-item d-flex justify-content-between align-items-center">
           <div>
-            {{ assignment.file_title }}
+            {{ file.title }}
           </div>
           <button 
             type="button"
             class="btn btn-secondary btn-sm"
             data-bs-toggle="modal" 
-            data-bs-target="#fileModal">
+            data-bs-target="#fileModal{{ file.id }}">
             View
           </button>
         </div>
+        {% endfor %}
       </div>
       {% else %}
         <div class="list-group-item empty-state">No files uploaded for this assignment!</div>
@@ -101,28 +103,32 @@
 </div>
 
 <!-- File Modal -->
-{% if assignment.file_upload %}
-<div class="modal" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+{% for file in assignment.files.all %}
+<div class="modal" id="fileModal{{ file.id }}" tabindex="-1" aria-labelledby="fileModalLabel{{ file.id }}" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="fileModalLabel">{{ assignment.file_title }}</h5>
+        <h5 class="modal-title" id="fileModalLabel{{ file.id }}">{{ file.title }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        {% if assignment.file_description %}
-        <p>Description: {{ assignment.file_description }}</p>
-       {% endif %}
-        {% if assignment.keywords %}
-          <p class="mb-3">Keywords: {{ assignment.keywords }}</p>
+        {% if file.description %}
+          <p><strong>Description:</strong> {{ file.description }}</p>
+        {% endif %}
+        {% if file.keywords %}
+          <p class="mb-3"><strong>Keywords:</strong> 
+            {% for keyword in file.keywords.split %} 
+              {{ keyword }}
+            {% endfor %}
+          </p>
         {% endif %}
         
-        <embed src="{{ assignment.file_upload.url }}" width="100%" height="500px">
+        <embed src="{{ file.file.url }}" width="100%" height="500px">
       </div>
     </div>
   </div>
 </div>
-{% endif %}
+{% endfor %}
 
 <!-- Add File Modal -->
 <div class="modal" id="addFileModal" tabindex="-1" aria-labelledby="addFileModalLabel" aria-hidden="true">
@@ -133,7 +139,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <form action="{% url 'assignments:edit_assignment' assignment.id %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <!-- Hidden fields to preserve assignment data -->
+                    <input type="hidden" name="title" value="{{ assignment.title }}">
+                    <input type="hidden" name="description" value="{{ assignment.description }}">
+                    <input type="hidden" name="due_date" value="{{ assignment.due_date|date:'Y-m-d' }}">
+                    <input type="hidden" name="course" value="{{ assignment.course.id }}">
+                    
                     <div class="mb-3">
                         <label for="file_upload" class="form-label">Upload File</label>
                         <input type="file" class="form-control" id="file_upload" name="file_upload" required />
@@ -161,6 +174,7 @@
                     {% with text="Upload" variant="primary" type="submit" %}
                         {% include "button.html" %}
                     {% endwith %}
+                </form>
             </div>
         </div>
     </div>
@@ -169,12 +183,15 @@
 <style>
 .fixed-height-body {
     height: 400px;
+    display: flex;
+    flex-direction: column;
 }
 
 .scrollable-card-content {
     height: 100%;
     overflow-y: auto;
     scrollbar-width: thin;
+    flex: 1;
 }
 
 .scrollable-card-content::-webkit-scrollbar {
@@ -215,7 +232,11 @@
     border: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     padding: 0.75rem 1.5rem;
-    min-height: 30px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
 }
 
 .btn-group {
@@ -273,8 +294,7 @@
             tagsDisplay.appendChild(tagElement);
             hiddenInput.value += "," + tag;
             
-            // Clear the input field after adding the tag
-            input.value = '';
+            input.value = "";
         }
     }
 </script>

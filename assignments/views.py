@@ -18,7 +18,7 @@ from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 from courses.models import Course
-from .models import Assignment
+from .models import Assignment, AssignmentFile
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -68,32 +68,33 @@ def add_assignment(request):
         except Course.DoesNotExist:
             return HttpResponseBadRequest('Invalid course selected.')
 
-        # Handle file metadata if file is uploaded
-        file_title = request.POST.get('file-title') if file_upload else None
-        file_description = request.POST.get('file-description') if file_upload else None
-        keywords = request.POST.get('keywords') if file_upload else None
-
-        # Validate file type if present
-        if file_upload:
-            validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
-            try:
-                validator(file_upload)
-            except ValidationError as e:
-                return HttpResponseBadRequest('Invalid file type.')
-
-        # Create and save assignment
+        # Create and save assignment first
         assignment = Assignment(
             title=title,
             description=description,
             due_date=due_date,
-            file_upload=file_upload,
-            file_title=file_title,
-            file_description=file_description,
-            keywords=keywords,
             user=request.user,
-            course=course
+            course=course,
+            keywords=request.POST.get('keywords')
         )
         assignment.save()
+
+        # Handle file upload if present
+        if file_upload:
+            validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
+            try:
+                validator(file_upload)
+                # Create AssignmentFile
+                AssignmentFile.objects.create(
+                    assignment=assignment,
+                    file=file_upload,
+                    title=request.POST.get('file-title') or file_upload.name,
+                    description=request.POST.get('file-description')
+                )
+            except ValidationError as e:
+                assignment.delete()  # Rollback assignment creation
+                return HttpResponseBadRequest('Invalid file type.')
+
         return redirect('assignments:assignment_list')
     return redirect('home')
 
@@ -154,31 +155,32 @@ def delete_assignment(request, assignment_id):
 def edit_assignment(request, assignment_id):
     """
     Handle editing of existing assignments.
-
-    Allows users to modify their own assignments, including updating files
-    and metadata. Includes permission checks and file validation.
-
-    Args:
-        request: HttpRequest object
-        assignment_id: ID of the assignment to edit
-
-    Returns:
-        HttpResponse: Rendered edit form or redirect after successful update
     """
-    # Verify permission to edit
     assignment = get_object_or_404(Assignment,
                                 id=assignment_id,
                                 course__in=request.user.profile.courses.all())
-    # if assignment.user != request.user:
-    #     return HttpResponseForbidden("You can't edit this assignment")
 
     if request.method == 'POST':
-        # Update assignment data
+        # If there's a file upload, create a new AssignmentFile
+        if request.FILES.get('file_upload'):
+            file_upload = request.FILES['file_upload']
+            validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
+            try:
+                validator(file_upload)
+                AssignmentFile.objects.create(
+                    assignment=assignment,
+                    file=file_upload,
+                    title=request.POST.get('file-title') or file_upload.name,
+                    description=request.POST.get('file-description')
+                )
+                return redirect('assignments:edit_assignment', assignment_id=assignment_id)
+            except ValidationError:
+                return HttpResponseBadRequest('Invalid file type.')
+
+        # Handle regular assignment updates
         assignment.title = request.POST.get('title')
         assignment.description = request.POST.get('description')
         assignment.due_date = request.POST.get('due_date')
-        keywords = request.POST.get('keywords')
-        file_upload = request.FILES.get('file_upload')
         
         # Update course if provided
         course_id = request.POST.get('course')
@@ -189,24 +191,13 @@ def edit_assignment(request, assignment_id):
             except Course.DoesNotExist:
                 return HttpResponseBadRequest('Invalid course.')
 
-        # Handle file upload if provided
-        if file_upload:
-            validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
-            try:
-                validator(file_upload)
-                assignment.file_upload = file_upload
-            except ValidationError as e:
-                return HttpResponseBadRequest('Invalid file type.')
-
-        assignment.keywords = keywords
         assignment.save()
         return redirect('assignments:assignment_list')
 
     # Display edit form
-    user_courses = request.user.profile.courses.all()
     return render(request, 'assignments/edit_assignment.html', {
         'assignment': assignment,
-        'courses': user_courses
+        'user': request.user
     })
 
 @login_required
