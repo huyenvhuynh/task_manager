@@ -240,3 +240,10 @@ def locked(request):
         request (HttpRequest): The incoming request object.
     """
     return render(request, 'users/locked.html', {})
+
+@login_required
+def profile(request):
+    context = {
+        'user': request.user,
+    }
+    return render(request, 'users/profile.html', context)

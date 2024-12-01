@@ -12,4 +12,5 @@ urlpatterns = [
     path('anonymous/', views.anonymous, name='anonymous'),
     path('about/', views.about, name='about'),
     path('locked/', views.locked, name='locked'),
+    path('profile/', views.profile, name='profile'),
 ]
