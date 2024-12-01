@@ -1,4 +1,3 @@
-<!-- templates/courses/create_course.html -->
 {% extends 'base.html' %}
 
 {% block content %}
@@ -6,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow-card">
-                <div>
+                <div class="card-header">
                     <h3 class="card-title mb-0">Create New Course</h3>
                 </div>
                 <div class="card-body">
@@ -22,16 +21,36 @@
                         {% for field in form %}
                             <div class="mb-3">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                <input type="{{ field.field.widget.input_type }}" 
-                                       class="form-control" 
-                                       id="{{ field.id_for_label }}"
-                                       name="{{ field.html_name }}"
-                                       value="{{ field.value|default:'' }}"
-                                       {% if field.field.required %}required{% endif %}>
+                                {% if field.name == 'description' %}
+                                    <textarea class="form-control" 
+                                              id="{{ field.id_for_label }}"
+                                              name="{{ field.html_name }}"
+                                              rows="4"
+                                              {% if field.field.required %}required{% endif %}>{{ field.value|default:'' }}</textarea>
+                                {% elif field.name == 'privacy' %}
+                                    <select class="form-select" 
+                                            id="{{ field.id_for_label }}"
+                                            name="{{ field.html_name }}"
+                                            {% if field.field.required %}required{% endif %}>
+                                        <option value="">Select privacy setting</option>
+                                        <option value="True" {% if field.value == True %}selected{% endif %}>Private</option>
+                                        <option value="False" {% if field.value == False %}selected{% endif %}>Public</option>
+                                    </select>
+                                {% else %}
+                                    <input type="{{ field.field.widget.input_type }}" 
+                                           class="form-control" 
+                                           id="{{ field.id_for_label }}"
+                                           name="{{ field.html_name }}"
+                                           value="{{ field.value|default:'' }}"
+                                           {% if field.field.required %}required{% endif %}>
+                                {% endif %}
                                 {% if field.errors %}
                                     {% for error in field.errors %}
                                         <div class="text-danger">{{ error }}</div>
                                     {% endfor %}
+                                {% endif %}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
                                 {% endif %}
                             </div>
                         {% endfor %}
