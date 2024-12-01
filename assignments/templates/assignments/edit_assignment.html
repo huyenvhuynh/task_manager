@@ -3,89 +3,122 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h1>Edit Assignment</h1>
-  <div class="shadow-card">
-  <form
-    action="{% url 'assignments:edit_assignment' assignment.id %}"
-    method="post"
-    enctype="multipart/form-data"
-  >
-    {% csrf_token %}
-    <div class="mb-3">
-      <label for="title" class="form-label">Title</label>
-      <input
-        type="text"
-        class="form-control"
-        id="title"
-        name="title"
-        value="{{ assignment.title }}"
-        required
-      />
-    </div>
-    <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-      <textarea
-        class="form-control"
-        id="description"
-        name="description"
-        rows="3"
-        required
-      >{{ assignment.description }}</textarea>
-    </div>
-    <div class="mb-3">
-      <label for="due_date" class="form-label">Due Date</label>
-      <input
-        type="date"
-        class="form-control"
-        id="due_date"
-        name="due_date"
-        value="{{ assignment.due_date|date:'Y-m-d' }}"
-        required
-      />
-    </div>
-    <div class="mb-3">
-      <label for="course" class="form-label">Course</label>
-      <select class="form-control" id="course" name="course" required>
-          {% for course in user.profile.courses.all %}
-              <option value="{{ course.id }}" {% if course.id == assignment.course.id %}selected{% endif %}>
-                  {{ course.full_name }}
-              </option>
-          {% endfor %}
-      </select>
-    </div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Assignment Details</h1>
+    <a href="{% url 'assignments:assignment_list' %}" class="text-decoration-none">
+      {% with text="Back to Assignments" variant="secondary" additional_classes="btn-grey" %}
+        {% include "button.html" %}
+      {% endwith %}
+    </a>
   </div>
-      <div class="card shadow-card mb-4">
-        <div class="card-header">
-          <div class="d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0">Assignment Files</h3>
+  <div class="shadow-card">
+    <form
+      action="{% url 'assignments:edit_assignment' assignment.id %}"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input
+          type="text"
+          class="form-control"
+          id="title"
+          name="title"
+          value="{{ assignment.title }}"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea
+          class="form-control"
+          id="description"
+          name="description"
+          rows="3"
+          required
+        >{{ assignment.description }}</textarea>
+      </div>
+      <div class="mb-3">
+        <label for="due_date" class="form-label">Due Date</label>
+        <input
+          type="date"
+          class="form-control"
+          id="due_date"
+          name="due_date"
+          value="{{ assignment.due_date|date:'Y-m-d' }}"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="course" class="form-label">Course</label>
+        <select class="form-control" id="course" name="course" required>
+            {% for course in user.profile.courses.all %}
+                <option value="{{ course.id }}" {% if course.id == assignment.course.id %}selected{% endif %}>
+                    {{ course.full_name }}
+                </option>
+            {% endfor %}
+        </select>
+      </div>
+      {% include "button.html" with type="submit" variant="primary" text="Save Changes" %}
+
+    </form>
+  </div>
+
+  <div class="card shadow-card mb-4">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">Assignment Files</h3>
+      </div>
+    </div>
+    <div class="card-body p-0 fixed-height-body">
+      {% if assignment.file_upload %}
+      <div class="list-group scrollable-card-content">
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            {{ assignment.file_title }}
           </div>
-        </div>
-        <div class="card-body p-0 fixed-height-body">
-          {% if assignment.file_upload %}
-          <div class="list-group scrollable-card-content">
-            <div class="list-group-item d-flex justify-content-between align-items-center hover:bg-gray-100">
-              <div>
-                {{ assignment.file_title }}
-              </div>
-            </div>
-          </div>
-          {% else %}
-            <div class="list-group-item empty-state">No files uploaded for this assignment!</div>
-          {% endif %}
+          <button 
+            type="button"
+            class="btn btn-secondary btn-sm"
+            data-bs-toggle="modal" 
+            data-bs-target="#fileModal">
+            View and Edit
+          </button>
         </div>
       </div>
+      {% else %}
+        <div class="list-group-item empty-state">No files uploaded for this assignment!</div>
+      {% endif %}
+    </div>
+  </div>
 
-    {% include "button.html" with type="submit" variant="secondary" text="Save Changes" %}
-  </form>
   <div class="mt-2"></div>
-  
-  <a href="{% url 'assignments:assignment_list' %}" class="me-2 text-decoration-none">
-    {% with text="Back to Assignments" variant="secondary" additional_classes="btn-grey" %}
-      {% include "button.html" %}
-    {% endwith %}
-  </a>
 </div>
 
+<!-- File Modal -->
+{% if assignment.file_upload %}
+<div class="modal" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fileModalLabel">{{ assignment.file_title }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if assignment.file_description %}
+        <p>Description: {{ assignment.file_description }}</p>
+       {% endif %}
+        {% if assignment.keywords %}
+          <p class="mb-3">Keywords: {{ assignment.keywords }}</p>
+        {% endif %}
+        
+        <embed src="{{ assignment.file_upload.url }}" width="100%" height="500px">
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 <style>
 .fixed-height-body {
     height: 400px;
@@ -164,42 +197,5 @@
     color: #6c757d;
 }
 </style>
+
 {% endblock %}
-
-
-
-<!--  <!-- <div class="mb-3">
-      <label class="form-label">Current File</label>
-      <p>
-        <a href="{{ assignment.file_upload.url }}"
-          >{{ assignment.file_upload.name }}</a
-        >
-      </p>
-    </div>
-    <p>
-      File:
-      <embed src="{{ assignment.file_upload.url }}" width="800" height="1000" style="margin-left: auto; margin-right: auto; display: block;">
-  </p>
-
-    <!-- <div class="mb-3">
-      <label for="file_upload" class="form-label">Replace File</label>
-      <input
-        type="file"
-        class="form-control"
-        id="file_upload"
-        name="file_upload"
-      />
-    </div> -->
-
-    <!-- File Metadata section -->
-    <!-- <div class="mb-3">
-      <h4>File Metadata</h4>
-      {% if assignment.file_title %}
-        <p>Title: {{ assignment.file_title }}</p>
-      {% endif %}
-      {% if assignment.file_description %}
-        <p>Description: {{ assignment.file_description }}</p>
-      {% endif %}
-      {% if assignment.keywords %}
-        <p>Keywords: {{ assignment.keywords }}</p>
-      {% endif %} --> 
