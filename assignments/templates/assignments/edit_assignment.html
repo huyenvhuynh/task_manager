@@ -60,8 +60,9 @@
             {% endfor %}
         </select>
       </div>
-      {% include "button.html" with type="submit" variant="primary" text="Save Changes" %}
-
+      <div class="card-footer">
+        {% include "button.html" with type="submit" variant="primary" text="Save Changes" %}
+      </div>
     </form>
   </div>
 
@@ -83,13 +84,16 @@
             class="btn btn-secondary btn-sm"
             data-bs-toggle="modal" 
             data-bs-target="#fileModal">
-            View and Edit
+            View
           </button>
         </div>
       </div>
       {% else %}
         <div class="list-group-item empty-state">No files uploaded for this assignment!</div>
       {% endif %}
+    </div>
+    <div class="card-footer">
+      {% include "button.html" with variant="primary" text="Add File" data_bs_toggle="modal" data_bs_target="#addFileModal" %}
     </div>
   </div>
 
@@ -119,6 +123,49 @@
   </div>
 </div>
 {% endif %}
+
+<!-- Add File Modal -->
+<div class="modal" id="addFileModal" tabindex="-1" aria-labelledby="addFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFileModalLabel">Add File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="file_upload" class="form-label">Upload File</label>
+                        <input type="file" class="form-control" id="file_upload" name="file_upload" required />
+                    </div>
+
+                    <!-- File Meta Data Section -->
+                    <div class="mb-3">
+                        <div id="metadataContainer">
+                            <div class="mb-2">
+                                <input type="text" class="form-control" id="file_title" name="file-title" placeholder="File Title" />
+                            </div>
+                            <div class="mb-2">
+                                <textarea class="form-control" id="file_description" name="file-description" rows="2" placeholder="File Description"></textarea>
+                            </div>
+                            <div class="tags-input-container d-flex">
+                                <input type="text" class="form-control me-2" id="keywords-input" placeholder="Add Keyword" />
+                                {% with text="Add" variant="primary" size="sm" onclick="addTag()" %}
+                                    {% include "button.html" %}
+                                {% endwith %}
+                            </div>
+                            <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
+                            <input type="hidden" name="keywords" id="keywords" />
+                        </div>
+                    </div>
+                    {% with text="Upload" variant="primary" type="submit" %}
+                        {% include "button.html" %}
+                    {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .fixed-height-body {
     height: 400px;
@@ -198,4 +245,37 @@
 }
 </style>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function addTag() {
+        const input = document.getElementById("keywords-input");
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+
+        let tag = input.value.trim();
+        if (tag) {
+            const tagElement = document.createElement("span");
+            tagElement.className = "tag";
+            tagElement.textContent = tag;
+
+            const deleteButton = document.createElement("span");
+            deleteButton.className = "delete-tag";
+            deleteButton.textContent = "×";
+            deleteButton.addEventListener("click", function() {
+                tagElement.remove();
+                const tags = Array.from(hiddenInput.value.split(",")).filter(t => t !== tag);
+                hiddenInput.value = tags.join(",");
+            });
+
+            tagElement.appendChild(deleteButton);
+            tagsDisplay.appendChild(tagElement);
+            hiddenInput.value += "," + tag;
+            
+            // Clear the input field after adding the tag
+            input.value = '';
+        }
+    }
+</script>
 {% endblock %}
