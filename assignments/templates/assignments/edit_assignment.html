@@ -125,12 +125,8 @@
         {% if file.description %}
           <p><strong>Description:</strong> {{ file.description }}</p>
         {% endif %}
-        {% if file.keywords %}
-          <p class="mb-3"><strong>Keywords:</strong> 
-            {% for keyword in file.keywords.split %} 
-              {{ keyword }}
-            {% endfor %}
-          </p>
+        {% if assignment.keywords %}
+        <p><Strong>Keywords</Strong> {{ assignment.keywords }}</p>
         {% endif %}
         
         <embed src="{{ file.file.url }}" width="100%" height="500px">
