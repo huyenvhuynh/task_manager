@@ -56,14 +56,14 @@
                 {% endif %}
               </li> -->
             <!-- Links for common users -->
+            <li class="nav-item">
+              <a
+                class="nav-link nav-courses"
+                href="{% url 'courses:course_list' %}"
+                >Courses</a
+              >
+            </li>
              {% if user.profile.role == 'user' %}
-              <li class="nav-item">
-                <a
-                  class="nav-link nav-courses"
-                  href="{% url 'courses:course_list' %}"
-                  >Courses</a
-                >
-              </li>
               <li class="nav-item">
                 <a
                   class="nav-link nav-assignments"
@@ -94,6 +94,7 @@
               <a class="nav-link" href="{% url 'assignments:admin_assignment_list' %}">Assignments</a>
             </li>
             {% endif %}
+            {% if user.profile.role == 'user' or user.profile.role == 'admin' %}
             <li class="nav-item">
               <a
                 class="nav-link nav-discussions"
@@ -101,7 +102,7 @@
                 >Discussions</a
               >
             </li>
-            
+            {% endif %}
           </ul>
 
           <!-- Right-aligned nav content -->
