@@ -42,3 +42,9 @@ jobs:
           GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"
         run: |
           python manage.py test --tag=workflow
+
+      - name: Run Login Page Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=login
