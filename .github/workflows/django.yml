@@ -2,36 +2,44 @@ name: Django CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-  build:
+  test:
+    name: Run Django Tests
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
-      fail-fast: false
       matrix:
         python-version: ["3.12.6"]
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Run Tests
-      env:
-        DJANGO_SETTINGS_MODULE: core.settings
-        GOOGLE_OAUTH_CLIENT_ID: "test_client_id"  
-        GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"  
-      run: |
-        python manage.py test --settings=core.settings
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Django Tests
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+          GOOGLE_OAUTH_CLIENT_ID: "test_client_id"
+          GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"
+        run: |
+          python manage.py test
+
+      - name: Run HTTPS Settings Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+          GOOGLE_OAUTH_CLIENT_ID: "test_client_id"
+          GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"
+        run: |
+          python manage.py test --tag=https
