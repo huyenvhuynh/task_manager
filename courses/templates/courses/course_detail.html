@@ -130,10 +130,12 @@
                         
                         {% if is_creator %}
                         <div>
+                            {% if user.profile.role != 'admin' %}
                             <a href="{% url 'courses:edit_course_description' course_id=course.id %}" 
                                class="btn btn-primary me-2">
                                 Edit Description
                             </a>
+                            {% endif %}
                             <a href="{% url 'courses:delete_course' course_id=course.id %}" 
                                class="btn btn-danger">
                                 Delete Course
