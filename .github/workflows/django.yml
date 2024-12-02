@@ -8,7 +8,6 @@ on:
 
 jobs:
   test:
-    name: Run Django Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,14 +27,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Django Tests
-        env:
-          DJANGO_SETTINGS_MODULE: core.settings
-          GOOGLE_OAUTH_CLIENT_ID: "test_client_id"
-          GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"
-        run: |
-          python manage.py test
-
       - name: Run HTTPS Settings Test
         env:
           DJANGO_SETTINGS_MODULE: core.settings
@@ -43,3 +34,11 @@ jobs:
           GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"
         run: |
           python manage.py test --tag=https
+
+      - name: Run Workflow Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+          GOOGLE_OAUTH_CLIENT_ID: "test_client_id"
+          GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"
+        run: |
+          python manage.py test --tag=workflow
