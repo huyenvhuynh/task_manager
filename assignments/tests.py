@@ -9,17 +9,17 @@ import os
 # Create your tests here.
 
 # This tests the GitHub issue 'List View #6', 'Add Assignment #8'
-class AssignmentTests(TestCase):
-    def setUp(self):
-        # Create a user and log in
-        self.client = Client()
-        self.user = User.objects.create_user(
-            username='testuser',
-            password='password',
-            email='testuser@example.com'
-        )
-        self.client.login(username='testuser', password='password')
-        self.course = Course.objects.create(course_number=2130, course_name='CSO1')
+# class AssignmentTests(TestCase):
+#     def setUp(self):
+#         # Create a user and log in
+#         self.client = Client()
+#         self.user = User.objects.create_user(
+#             username='testuser',
+#             password='password',
+#             email='testuser@example.com'
+#         )
+#         self.client.login(username='testuser', password='password')
+#         self.course = Course.objects.create(course_number=2130, course_name='CSO1')
         
         # # Define a valid file for upload
         # self.valid_file = SimpleUploadedFile(

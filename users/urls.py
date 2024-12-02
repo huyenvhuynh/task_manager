@@ -8,8 +8,9 @@ urlpatterns = [
     path('sign-in/', views.sign_in, name='sign_in'),
     path('sign-out/', views.sign_out, name='sign_out'),
     path('auth-receiver/', views.auth_receiver, name='auth_receiver'),
-    path('select-role/', views.select_role, name='select_role'),
+    # path('select-role/', views.select_role, name='select_role'),
     path('anonymous/', views.anonymous, name='anonymous'),
     path('about/', views.about, name='about'),
     path('locked/', views.locked, name='locked'),
+    path('profile/', views.profile, name='profile'),
 ]

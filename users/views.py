@@ -135,6 +135,11 @@ def auth_receiver(request):
         }
     )
 
+    # Set role to 'user' for new users
+    if created:
+        user.profile.role = 'user'
+        user.profile.save()
+
     # Handle user session
     login(request, user)
     request.session['user_data'] = {
@@ -142,58 +147,58 @@ def auth_receiver(request):
         'name': f"{first_name} {last_name}"
     }
 
-    return redirect('users:select_role' if created else 'users:sign_in')
+    return redirect('users:sign_in')
 
 
-@login_required
-def select_role(request):
-    """
-    Handle user role selection and profile updates.
+# @login_required
+# def select_role(request):
+#     """
+#     Handle user role selection and profile updates.
 
-    Processes role selection for new users and updates their profile accordingly.
-    Only accepts 'admin' or 'user' as valid roles.
+#     Processes role selection for new users and updates their profile accordingly.
+#     Only accepts 'admin' or 'user' as valid roles.
 
-    Args:
-        request (HttpRequest): The incoming request, must be authenticated.
+#     Args:
+#         request (HttpRequest): The incoming request, must be authenticated.
 
-    Returns:
-        HttpResponse: One of the following:
-            - Rendered sign-in page with success message after role selection
-            - Rendered role selection form for GET requests
-            - 400 error for invalid role selection
+#     Returns:
+#         HttpResponse: One of the following:
+#             - Rendered sign-in page with success message after role selection
+#             - Rendered role selection form for GET requests
+#             - 400 error for invalid role selection
 
-    Notes:
-        - Requires user authentication (@login_required)
-        - Updates both profile and session data with selected role
-    """
-    if request.method == 'POST':
-        selected_role = request.POST.get('role')
-        if selected_role not in ['admin', 'user']:
-            return HttpResponse('Invalid role selection', status=400)
+#     Notes:
+#         - Requires user authentication (@login_required)
+#         - Updates both profile and session data with selected role
+#     """
+#     if request.method == 'POST':
+#         selected_role = request.POST.get('role')
+#         if selected_role not in ['admin', 'user']:
+#             return HttpResponse('Invalid role selection', status=400)
 
-        # Update user profile and session
-        request.user.profile.role = selected_role
-        request.user.profile.save()
+#         # Update user profile and session
+#         request.user.profile.role = selected_role
+#         request.user.profile.save()
 
-        # Ensure and update session data
-        if 'user_data' not in request.session:
-            request.session['user_data'] = {}
-        request.session['user_data']['role'] = selected_role
+#         # Ensure and update session data
+#         if 'user_data' not in request.session:
+#             request.session['user_data'] = {}
+#         request.session['user_data']['role'] = selected_role
 
-        # Create role-specific success message
-        message = (
-            "Successfully signed in as an Administrator!"
-            if selected_role == 'admin'
-            else "Successfully signed in as a Common User!"
-        )
+#         # Create role-specific success message
+#         message = (
+#             "Successfully signed in as an Administrator!"
+#             if selected_role == 'admin'
+#             else "Successfully signed in as a Common User!"
+#         )
 
-        return render(request, 'users/sign_in.html', {
-            'message': message,
-            'email': request.user.email,
-            'name': request.user.get_full_name(),
-        })
+#         return render(request, 'users/sign_in.html', {
+#             'message': message,
+#             'email': request.user.email,
+#             'name': request.user.get_full_name(),
+#         })
 
-    return render(request, 'users/select_role.html')
+#     return render(request, 'users/select_role.html')
 
 
 def sign_out(request):
@@ -240,3 +245,10 @@ def locked(request):
         request (HttpRequest): The incoming request object.
     """
     return render(request, 'users/locked.html', {})
+
+@login_required
+def profile(request):
+    context = {
+        'user': request.user,
+    }
+    return render(request, 'users/profile.html', context)
