@@ -88,7 +88,7 @@
             {% endif %}
             {% if user.profile.role == 'admin' %}
             <li class="nav-item">
-              <a class="nav-link" href="#">Students</a>
+              <a class="nav-link" href="{% url 'courses:admin_course' %}">Courses</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'assignments:admin_assignment_list' %}">Assignments</a>

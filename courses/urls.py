@@ -18,4 +18,5 @@ urlpatterns = [
     # Enrollment request management
     path('course/<int:course_id>/request-enrollment/', views.request_enrollment, name='request_enrollment'),
     path('enrollment-request/<int:request_id>/<str:action>/', views.manage_enrollment_request, name='manage_enrollment_request'),
+    path('courses/admin/', views.admin_course, name='admin_course'),
 ]
