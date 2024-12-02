@@ -112,10 +112,14 @@
               <span class="nav-link">Hello, {{ user.get_full_name }}!</span>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
+              <div class="dropdown">
+                <i class='fas fa-user-cog nav-link' style='font-size:22px'></i>
+
+                <div class="dropdown-content">
+                  <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
+                  <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
+                </div>
+              </div>
             </li>
             {% else %}
             <li class="nav-item">
@@ -199,44 +203,62 @@
 </html>
 
 <style>
-     .shadow-card {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #fff;
-    border-radius: 8px;
-    border: none;
-  }
+.shadow-card {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  border: none;
+}
 
-    .shadow-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-  }
+.shadow-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
 
+footer {
+  width: 100%;
+  background-color: #fff;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
+}
 
-    footer {
-      width: 100%;
-      background-color: #fff;
-      position: relative;
-      bottom: 0;
-      width: 100%;
-      z-index: 1000;
-    }
+html {
+  scroll-behavior: smooth;
+}    
 
-    html {
-      scroll-behavior: smooth;
-    }    
-  
-  .nav-link:hover {
-    color: #3498db !important;
-  }
+.nav-link:hover {
+  color: #3498db !important;
+}
 
-  .text-primary {
-    color: #3498db !important;
-  }
+.text-primary {
+  color: #3498db !important;
+}
 
-  .bg-primary {
-    background: linear-gradient(145deg, #3498db, #2980b9) !important;
-  }
+.bg-primary {
+  background: linear-gradient(145deg, #3498db, #2980b9) !important;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+  right: 0;
+}
 </style>
