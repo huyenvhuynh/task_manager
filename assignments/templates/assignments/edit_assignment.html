@@ -27,6 +27,7 @@
           name="title"
           value="{{ assignment.title }}"
           required
+          {% if user.profile.role == 'admin' %}disabled{% endif %}
         />
       </div>
       <div class="mb-3">
@@ -37,6 +38,7 @@
           name="description"
           rows="3"
           required
+          {% if user.profile.role == 'admin' %}disabled{% endif %}
         >{{ assignment.description }}</textarea>
       </div>
       <div class="mb-3">
@@ -48,11 +50,12 @@
           name="due_date"
           value="{{ assignment.due_date|date:'Y-m-d' }}"
           required
+          {% if user.profile.role == 'admin' %}disabled{% endif %}
         />
       </div>
       <div class="mb-3">
         <label for="course" class="form-label">Course</label>
-        <select class="form-control" id="course" name="course" required>
+        <select class="form-control" id="course" name="course" required {% if user.profile.role == 'admin' %}disabled{% endif %}>
             {% for course in user.profile.courses.all %}
                 <option value="{{ course.id }}" {% if course.id == assignment.course.id %}selected{% endif %}>
                     {{ course.full_name }}
@@ -61,7 +64,9 @@
         </select>
       </div>
       <div class="card-footer">
-        {% include "button.html" with type="submit" variant="primary" text="Save Changes" %}
+        {% if user.profile.role != 'admin' %}
+          {% include "button.html" with type="submit" variant="primary" text="Save Changes" %}
+        {% endif %}
       </div>
     </form>
   </div>
@@ -105,7 +110,9 @@
       {% endif %}
     </div>
     <div class="card-footer">
-      {% include "button.html" with variant="primary" text="Add File" data_bs_toggle="modal" data_bs_target="#addFileModal" %}
+      {% if user.profile.role != 'admin' %}
+        {% include "button.html" with variant="primary" text="Add File" data_bs_toggle="modal" data_bs_target="#addFileModal" %}
+      {% endif %}
     </div>
   </div>
 
@@ -125,8 +132,11 @@
         {% if file.description %}
           <p><strong>Description:</strong> {{ file.description }}</p>
         {% endif %}
-        {% if assignment.keywords %}
-        <p><Strong>Keywords</Strong> {{ assignment.keywords }}</p>
+        {% if assignment.keywords %}
+          <p><strong>Keywords:</strong> {{ assignment.keywords }}</p>
+        {% endif %}
+        {% if file.uploaded_at %}
+          <p><strong>Uploaded:</strong> {{ file.uploaded_at|date:"F j, Y, g:i a" }}</p>
         {% endif %}
         
         <embed src="{{ file.file.url }}" width="100%" height="500px">

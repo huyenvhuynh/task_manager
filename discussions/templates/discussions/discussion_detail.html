@@ -32,19 +32,16 @@
         <h3 class="mb-4">Comments ({{ discussion.comments.count }})</h3>
         
         <!-- Add Comment Form -->
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and user.profile.role != 'admin' %}
         <div class="card mb-4">
             <div class="card-body">
-                <form action="" method="post">
+                <form action="{% url 'discussions:discussion_detail' discussion.id %}" method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="content" class="form-label">Add a comment</label>
+                        <label for="content" class="form-label">Add a Comment</label>
                         <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
                     </div>
-                    
-                    {% with text="Post Comment" variant="primary" type="submit" %}
-                        {% include "button.html" %}
-                    {% endwith %}
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
                 </form>
             </div>
         </div>

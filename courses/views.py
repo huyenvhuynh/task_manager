@@ -144,6 +144,10 @@ def manage_enrollment_request(request, request_id, action):
 
 def course_list(request):
     """Display a list of all available courses."""
+    # Redirect admin users to the admin course view
+    if request.user.is_authenticated and request.user.profile.role == 'admin':
+        return redirect('courses:admin_course')
+        
     courses = Course.objects.all()
     return render(request, 'courses/course_list.html', {'courses': courses})
 
@@ -220,3 +224,12 @@ def edit_course_description(request, course_id):
         'form': form,
         'course': course
     })
+
+@login_required
+def admin_course(request):
+    """
+    Display all courses in an admin view.
+    Only accessible to authenticated users.
+    """
+    courses = Course.objects.all().order_by('course_number')
+    return render(request, 'admin_course.html', {'courses': courses})
