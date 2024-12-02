@@ -34,4 +34,4 @@ jobs:
         GOOGLE_OAUTH_CLIENT_ID: "test_client_id"  
         GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"  
       run: |
-        python manage.py test
+        python manage.py test --settings=core.settings
