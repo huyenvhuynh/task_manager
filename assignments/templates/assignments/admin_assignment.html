@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="row mb-3">
+        <!-- Course Filter -->
+        <div class="col-auto ms-auto">
+            <select class="form-select" id="courseFilter">
+                <option value="all">All Courses</option>
+                {% for course in courses %}
+                    <option value="{{ course.id }}">{{ course.full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">All Assignments</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive scrollable-card-content">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Due Date</th>
+                            <th>Course</th>
+                            <th>Assignment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments|dictsort:"due_date" %}
+                        <tr data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            data-course-id="{{ assignment.course.id }}"
+                            title="{{ assignment.description }}"
+                            style="cursor: pointer"
+                            onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
+                            <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                            <td>{{ assignment.course.full_name }}</td>
+                            <td>{{ assignment.title }}</td>
+                            <td class="text-center">
+                                <form action="{% url 'assignments:delete_assignment' assignment.id %}" 
+                                      method="post" 
+                                      style="margin:0" 
+                                      onclick="event.stopPropagation()"
+                                      onsubmit="return confirm('Are you sure you want to delete this assignment?')">
+                                    {% csrf_token %}
+                                    {% with text="Delete" variant="secondary" additional_classes="btn-red btn-sm" size="sm" type="submit" %}
+                                        {% include "button.html" %}
+                                    {% endwith %}
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="text-center py-4 no-assignments" style="display: none;">
+                    <h5>No assignments found for this course!</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Copying the same styles from assignment_list.html */
+.container {
+    max-width: 1140px;
+    padding: 2rem;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(145deg, #f8f9fa, #fff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.card-header h3 {
+    color: #2d3436;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.table {
+    margin: 0;
+}
+
+.table thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.5rem;
+}
+
+.table td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    color: #2d3436;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.scrollable-card-content {
+    height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.form-select {
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0.625rem 2.25rem 0.625rem 1.25rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.form-select:focus {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3498db;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+    // Course filtering functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const courseFilter = document.getElementById('courseFilter');
+        
+        courseFilter.addEventListener('change', function() {
+            const selectedCourseId = this.value;
+            const allRows = document.querySelectorAll('tr[data-course-id]');
+            let hasVisibleRows = false;
+            
+            allRows.forEach(row => {
+                const isVisible = selectedCourseId === 'all' || row.getAttribute('data-course-id') === selectedCourseId;
+                row.style.display = isVisible ? '' : 'none';
+                if (isVisible) hasVisibleRows = true;
+            });
+
+            document.querySelector('.no-assignments').style.display = hasVisibleRows ? 'none' : 'block';
+        });
+    });
+</script>
+{% endblock %}

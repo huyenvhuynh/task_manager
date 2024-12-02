@@ -21,6 +21,7 @@ from courses.models import Course
 from .models import Assignment, AssignmentFile
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 def home(request):
@@ -103,16 +104,18 @@ def add_assignment(request):
 def assignment_list(request):
     """
     Display list of uncompleted assignments for the authenticated user's courses.
-
-    Retrieves and displays assignments associated with the courses
-    the user is enrolled in, excluding those marked as completed.
+    Redirects admin users to the admin assignment list view.
 
     Args:
         request: HttpRequest object
 
     Returns:
-        HttpResponse: Rendered assignment list page
+        HttpResponse: Rendered assignment list page or redirect for admin users
     """
+    # Redirect admin users to admin assignment list
+    if request.user.profile.role == 'admin':
+        return redirect('assignments:admin_assignment_list')
+        
     user_courses = request.user.profile.courses.all()
     # Filter out completed assignments using exclude()
     assignments = Assignment.objects.filter(course__in=user_courses).exclude(
@@ -141,13 +144,17 @@ def delete_assignment(request, assignment_id):
         assignment_id: ID of the assignment to delete
 
     Returns:
-        HttpResponse: Redirect to assignment list
+        HttpResponse: Redirect to appropriate assignment list based on user type
     """
     assignment = get_object_or_404(Assignment,
                                 id=assignment_id,
                                 course__in=request.user.profile.courses.all())
     if assignment.user == request.user:
         assignment.delete()
+    
+    # Redirect based on user role
+    if request.user.profile.role == 'admin':
+        return redirect('assignments:admin_assignment_list')
     return redirect('assignments:assignment_list')
 
 
@@ -299,3 +306,24 @@ def delete_file(request, assignment_id, file_id):
     file.delete()
     
     return redirect('assignments:edit_assignment', assignment_id=assignment_id)
+
+@login_required
+def admin_assignment_list(request):
+    """
+    Display list of all assignments for admin users.
+    Only accessible by administrator members.
+
+    Args:
+        request: HttpRequest object
+
+    Returns:
+        HttpResponse: Rendered admin assignment list page
+    """
+    # Get all courses and assignments
+    courses = Course.objects.all()
+    assignments = Assignment.objects.all()
+
+    return render(request, 'assignments/admin_assignment.html', {
+        'assignments': assignments,
+        'courses': courses
+    })
