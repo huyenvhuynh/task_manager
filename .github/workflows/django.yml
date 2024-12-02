@@ -30,7 +30,7 @@ jobs:
 
     - name: Run Tests
       env:
-        DJANGO_SETTINGS_MODULE: myproject.settings
+        DJANGO_SETTINGS_MODULE: core.settings
         GOOGLE_OAUTH_CLIENT_ID: "test_client_id"  
         GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"  
       run: |
