@@ -48,51 +48,44 @@
           <ul class="navbar-nav mx-auto">
 
               <a class="nav-link" href="{% url 'home' %}">Home</a>
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 {% if request.resolver_match.url_name == 'home' %}
                   <a class="nav-link" href="#about">About</a>
                 {% else %}
                   <a class="nav-link" href="{% url 'home' %}#about">About</a> 
                 {% endif %}
-              </li>
+              </li> -->
             <!-- Links for common users -->
-            <li class="nav-item">
-              <a
-                class="nav-link nav-courses"
-                href="{% url 'courses:course_list' %}"
-                >Courses</a
-              >
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link nav-assignments"
-                href="{% url 'assignments:assignment_list' %}"
-                >My Assignments</a
-              >
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link nav-calendar"
-                href="{% url 'assignments:calendar' %}"
-                >Calendar</a
-              >
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link nav-search"
-                href="{% url 'assignments:file_search' %}"
-                >Search</a
-              >
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link nav-discussions"
-                href="{% url 'discussions:discussion_list' %}"
-                >Discussions</a
-              >
-            </li>
-
-            <!-- Links for admin users -->
+             {% if user.profile.role == 'user' %}
+              <li class="nav-item">
+                <a
+                  class="nav-link nav-courses"
+                  href="{% url 'courses:course_list' %}"
+                  >Courses</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link nav-assignments"
+                  href="{% url 'assignments:assignment_list' %}"
+                  >My Assignments</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link nav-calendar"
+                  href="{% url 'assignments:calendar' %}"
+                  >Calendar</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link nav-search"
+                  href="{% url 'assignments:file_search' %}"
+                  >Search</a
+                >
+              </li>
+            {% endif %}
             {% if user.profile.role == 'admin' %}
             <li class="nav-item">
               <a class="nav-link" href="#">Students</a>
@@ -101,6 +94,14 @@
               <a class="nav-link" href="#">Assignments</a>
             </li>
             {% endif %}
+            <li class="nav-item">
+              <a
+                class="nav-link nav-discussions"
+                href="{% url 'discussions:discussion_list' %}"
+                >Discussions</a
+              >
+            </li>
+            
           </ul>
 
           <!-- Right-aligned nav content -->
@@ -140,7 +141,7 @@
       </div>
 
       <!-- Navigation Links -->
-      <div class="col-12">
+      <!-- <div class="col-12">
         <ul class="nav justify-content-center">
           <li class="nav-item">
             <a href="{% url 'home' %}" class="nav-link px-1 text-body-secondary">Home</a>
@@ -175,13 +176,13 @@
           </li>
           {% endif %}
         </ul>
-      </div>
+      </div> -->
 
       <!-- Info Text -->
       <div class="col-12">
         <div class="d-flex flex-column gap-2 text-body-secondary" style="font-size: 0.75rem;">
           <p class="mb-0">© 2024 TEAM A-04</p>
-          <p class="mb-0">This project is part of CS 3240 coursework at the University of Virginia.</p>
+          <p class="mb-0">This project is part of CS 3240 coursework at the University of Virginia. The system is not monitored, and no real information should be submitted.</p>
           <p class="mb-0">Isaac Coles | Samuel Honigblum | Jessica Choi | Huyen Huynh</p>
         </div>
       </div>

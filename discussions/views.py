@@ -18,7 +18,11 @@ def discussion_list(request):
         HttpResponse: The rendered discussion list template with discussions and user's courses.
     """
     if  request.user.is_authenticated:
-        user_courses = request.user.profile.courses.all()
+        # Check if user is admin
+        if request.user.profile.role == 'admin':
+            user_courses = Course.objects.all()
+        else:
+            user_courses = request.user.profile.courses.all()
         selected_course = request.GET.get('course')
     else:
         user_courses = Course.objects.all()
