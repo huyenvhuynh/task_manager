@@ -190,7 +190,7 @@
                             {% with text="Add File Meta Data ▼" variant="secondary" size="sm" onclick="toggleMetaDataSection()" additional_classes="w-100 justify-content-between" id="keywordsToggleBtn" %}
                                 {% include "button.html" %}
                             {% endwith %}
-                        </div>
+                        </div> 
                         <div id="metadataContainer" style="display: none;">
                             <div class="mb-2">
                                 <input type="text" class="form-control" id="file_title" name="file-title" placeholder="File Title" />
@@ -468,7 +468,7 @@ h1 {
 
             const deleteButton = document.createElement("span");
             deleteButton.className = "tag-delete";
-            deleteButton.textContent = "×";
+            deleteButton.textContent = "×  ";
             deleteButton.onclick = function () {
                 tagsDisplay.removeChild(tagElement);
                 updateHiddenInput();

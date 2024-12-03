@@ -69,6 +69,15 @@
     {% endfor %}
   </ul>
   {% else %}
+  <!-- Search Bar -->
+  <div class="d-flex justify-content-end mb-3">
+    <form action="" method="get" class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search Keywords..." value="{{ request.GET.q|default:'' }}">
+      {% with text="Search" variant="primary" type="submit" %}
+        {% include "button.html" %}
+      {% endwith %}
+    </form>
+  </div>
   <p>No assignments found.</p>
   {% endif %}
 </div>
