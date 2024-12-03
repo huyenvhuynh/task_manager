@@ -155,7 +155,7 @@ def delete_assignment(request, assignment_id):
     # Redirect based on user role
     if request.user.profile.role == 'admin':
         return redirect('assignments:admin_assignment_list')
-    return redirect('assignments:assignment_list')
+    return redirect('assignments:file_search')
 
 
 @login_required
