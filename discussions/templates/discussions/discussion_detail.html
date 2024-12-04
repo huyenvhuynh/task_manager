@@ -16,8 +16,7 @@
         <span class="badge bg-primary">{{ discussion.course.name }}</span>
       </div>
       <div class="text-muted mb-3">
-        Posted by {{ discussion.user.get_full_name }} on {{
-        discussion.created_at|date:"M d, Y" }}
+        Posted by {{ discussion.user.get_full_name }} on {{ discussion.created_at|date:"M d, Y" }}
       </div>
       <div class="discussion-content mb-4">
         {{ discussion.content|linebreaks }}
