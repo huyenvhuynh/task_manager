@@ -35,8 +35,11 @@ def create_course_group(request):
             course.creator = request.user
             course.save()
             
-            # Create and associate a permission group
-            group = Group.objects.create(name=course.full_name)
+            # Create a unique group name and get or create the group
+            group_name = f"{course.full_name}_{course.id}"
+            group, created = Group.objects.get_or_create(name=group_name)
+            
+            # Add user to group
             request.user.groups.add(group)
             
             # Auto-enroll the creator
@@ -153,14 +156,22 @@ def course_list(request):
 
 @login_required
 def enroll_in_course(request, course_id):
-    """Handle direct enrollment for public courses."""
+    """Handle direct enrollment for public courses and creator re-enrollment."""
     course = get_object_or_404(Course, id=course_id)
     
-    if course.privacy:
+    # Allow creator to always re-enroll
+    if request.user == course.creator:
+        request.user.profile.courses.add(course)
+        course.enrolled_users.add(request.user)
+        messages.success(request, f"Successfully re-enrolled in your course {course.full_name}")
+        return redirect('courses:course_list')
+        
+    if course.privacy and request.user != course.creator:
         # Redirect to request enrollment for private courses
         return redirect('courses:request_enrollment', course_id=course_id)
         
     request.user.profile.courses.add(course)
+    course.enrolled_users.add(request.user)
     messages.success(request, f"Successfully enrolled in {course.full_name}")
     return redirect('courses:course_list')
 
@@ -169,7 +180,10 @@ def unenroll_from_course(request, course_id):
     """Handle unenrollment from courses."""
     if request.method == 'POST':
         course = get_object_or_404(Course, id=course_id)
+        # Remove from profile's courses
         request.user.profile.courses.remove(course)
+        # Remove from course's enrolled_users
+        course.enrolled_users.remove(request.user)
         messages.success(request, f"Successfully unenrolled from {course.full_name}")
     return redirect('courses:course_list')
 

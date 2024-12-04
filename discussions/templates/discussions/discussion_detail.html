@@ -1,13 +1,10 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
+{% block content %}
 <div class="container mt-5">
   <!-- Back Button -->
   <div class="mb-4">
-    <a
-      href="{% url 'discussions:discussion_list' %}"
-      class="me-2 text-decoration-none"
-    >
-      {% with text="Back to Discussions" variant="secondary"
-      additional_classes="btn-grey" %} {% include "button.html" %} {% endwith %}
+    <a href="{% url 'discussions:discussion_list' %}" class="me-2 text-decoration-none">
+      {% include "button.html" with text="Back to Discussions" variant="secondary" additional_classes="btn-grey" %}
     </a>
   </div>
 
@@ -19,8 +16,7 @@
         <span class="badge bg-primary">{{ discussion.course.name }}</span>
       </div>
       <div class="text-muted mb-3">
-        Posted by {{ discussion.user.get_full_name }} on {{
-        discussion.created_at|date:"M d, Y" }}
+        Posted by {{ discussion.user.get_full_name }} on {{ discussion.created_at|date:"M d, Y" }}
       </div>
       <div class="discussion-content mb-4">
         {{ discussion.content|linebreaks }}

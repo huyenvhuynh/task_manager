@@ -298,20 +298,25 @@
             tagElement.textContent = tag;
 
             const deleteButton = document.createElement("span");
-            deleteButton.className = "delete-tag";
-            deleteButton.textContent = "×";
-            deleteButton.addEventListener("click", function() {
-                tagElement.remove();
-                const tags = Array.from(hiddenInput.value.split(",")).filter(t => t !== tag);
-                hiddenInput.value = tags.join(",");
-            });
+            deleteButton.className = "tag-delete";
+            deleteButton.textContent = "×  ";
+            deleteButton.onclick = function() {
+                tagsDisplay.removeChild(tagElement);
+                updateHiddenInput();
+            };
 
             tagElement.appendChild(deleteButton);
             tagsDisplay.appendChild(tagElement);
-            hiddenInput.value += "," + tag;
-            
+
             input.value = "";
+            updateHiddenInput();
         }
+    }
+
+    function updateHiddenInput() {
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+        hiddenInput.value = Array.from(tagsDisplay.children).map(tag => tag.textContent).join(",");
     }
 </script>
 {% endblock %}
