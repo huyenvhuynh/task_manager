@@ -76,7 +76,7 @@
                                         </a>
                                         <form action="{% url 'courses:unenroll_from_course' course.id %}" method="post" style="margin:0">
                                             {% csrf_token %}
-                                            {% with text="Unenroll" variant="danger" type="submit" %}
+                                            {% with type="submit" text="Unenroll" variant="secondary" additional_classes="btn-red" %}
                                                 {% include "button.html" %}
                                             {% endwith %}
                                         </form>

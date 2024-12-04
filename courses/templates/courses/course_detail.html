@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -107,11 +108,13 @@
                                             <div class="btn-group">
                                                 <form action="{% url 'courses:manage_enrollment_request' request.id 'approve' %}" method="post" class="d-inline">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                                    {% with type="submit" text="Approve" variant="secondary" additional_classes="btn-green btn-sm" %}
+                                                        {% include "button.html" %}
+                                                    {% endwith %}
                                                 </form>
                                                 <form action="{% url 'courses:manage_enrollment_request' request.id 'reject' %}" method="post" class="d-inline ms-2">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                                    <button type="submit" class="btn btn-secondary btn-red btn-sm">Reject</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -124,20 +127,22 @@
                     {% endif %}
 
                     <div class="d-flex justify-content-between align-items-center mt-4">
-                        <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">
-                            Back to Courses
+                        <a href="{% url 'courses:course_list' %}">
+                            {% with text="Back to Courses" variant="secondary" additional_classes="btn-grey" %}
+                                {% include "button.html" %}
+                            {% endwith %}
                         </a>
                         
                         {% if is_creator %}
                         <div>
                             {% if user.profile.role != 'admin' %}
                             <a href="{% url 'courses:edit_course_description' course_id=course.id %}" 
-                               class="btn btn-primary me-2">
+                               class="btn btn-secondary me-2">
                                 Edit Description
                             </a>
                             {% endif %}
                             <a href="{% url 'courses:delete_course' course_id=course.id %}" 
-                               class="btn btn-danger">
+                               class="btn btn-secondary btn-red">
                                 Delete Course
                             </a>
                         </div>
