@@ -15,7 +15,7 @@
           </h1>
           {% if user.is_authenticated %}
             <div class="bg-white bg-opacity-10 p-4 rounded mb-5">
-              <h2 class="h3 text-white mb-0">Your role: {{ user.profile.role }}</h2>
+              <h2 class="h3 text-white mb-0">Your role: {% if user.profile.role == 'admin' %}Administrator{% elif user.profile.role == 'user' %}Common User{% else %}{{ user.profile.role }}{% endif %}</h2>
             </div>
           {% else %}
             <div class="mt-5 mb-5">

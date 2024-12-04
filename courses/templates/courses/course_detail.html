@@ -73,7 +73,7 @@
                         </div>
                     {% endif %}
 
-                    {% if course.privacy and not user_has_access %}
+                    {% if course.privacy and not user_has_access and user.profile.role != 'admin' %}
                         <!-- Enrollment Request Section for Private Courses -->
                         <div class="alert alert-info mt-4">
                             <p>This is a private course. You need to request enrollment to access course materials.</p>
@@ -96,7 +96,7 @@
                         </div>
                     {% endif %}
 
-                    {% if is_creator %}
+                    {% if is_creator and user.profile.role != 'admin' %}
                         <!-- Enrollment Requests Section -->
                         <div class="mt-4">
                             <h4>Enrollment Requests</h4>
