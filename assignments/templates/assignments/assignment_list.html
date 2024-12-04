@@ -1,36 +1,41 @@
 {% extends 'base.html' %}
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
 
 {% block content %}
 <div class="container mt-3">
     {% if user.profile.courses.all %}
-        <div class="row mb-3">
-            <!-- Add Assignment Button -->
-            <div class="col">
-                {% if user.is_authenticated and user.profile.role == 'user' %}
-                    {% with text="Add Assignment" variant="primary" data_bs_toggle="modal" data_bs_target="#addAssignmentModal" %}
-                        {% include "button.html" %}
-                    {% endwith %}
-                {% endif %}
-            </div>
-            <!-- Course Filter -->
-            <div class="col-auto">
-                <select class="form-select" id="courseFilter">
-                    <option value="all">All Courses</option>
-                    {% for course in user.profile.courses.all %}
-                        <option value="{{ course.id }}">{{ course.full_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-    {% else %}
-        <div class="text-center my-5">
-            <h4 class="text-muted mb-4">You are not enrolled in any courses! Please enroll in a course to view your assignments.</h4>
-            <a href="{% url 'courses:course_list' %}">
-                {% with text="Enroll in Courses" variant="secondary" %}
+    <div class="row mb-3">
+        <!-- Add Assignment Button -->
+        <div class="col">
+            {% if user.is_authenticated and user.profile.role == 'user' %}
+                {% with text="Add Assignment" variant="primary" data_bs_toggle="modal" data_bs_target="#addAssignmentModal" %}
                     {% include "button.html" %}
                 {% endwith %}
-            </a>
+            {% endif %}
         </div>
+        <!-- Course Filter -->
+        <div class="col-auto">
+            <select class="form-select" id="courseFilter">
+                <option value="all">All Courses</option>
+                {% for course in user.profile.courses.all %}
+                    <option value="{{ course.id }}">{{ course.full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center my-5">
+        <h4 class="text-muted mb-4">You are not enrolled in any courses! Please enroll in a course to view your assignments.</h4>
+        <a href="{% url 'courses:course_list' %}">
+            {% with text="Enroll in Courses" variant="secondary" %}
+                {% include "button.html" %}
+            {% endwith %}
+        </a>
+    </div>
     {% endif %}
 
     {% if assignments %}
@@ -129,94 +134,91 @@
             </div>
         </div>
     </div>
-    
     {% endif %}
 
-    
-
-
-<!-- Add Assignment Modal -->
-{% if user.is_authenticated and user.profile.role == 'user' %}
-<div class="modal" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h5 class="modal-title" id="addAssignmentModalLabel">New Assignment</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <!-- Modal Body with Form -->
-            <div class="modal-body">
-                <form action="{% url 'assignments:add_assignment' %}" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ request.path }}" />
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="title" name="title" required />
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="due_date" class="form-label">Due Date</label>
-                        <input type="date" 
-                               class="form-control" 
-                               id="due_date" 
-                               name="due_date" 
-                               required />
-                        <div id="due_date_error" class="text-danger" style="display: none;">
-                            Please enter a valid date that is after today with a 4-digit year.
+    <!-- Add Assignment Modal -->
+    {% if user.is_authenticated and user.profile.role == 'user' %}
+    <div class="modal" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAssignmentModalLabel">New Assignment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Modal Body with Form -->
+                <div class="modal-body">
+                    <form action="{% url 'assignments:add_assignment' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}" />
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required />
                         </div>
-                    </div>
-                                      
-                                                                                                                 
-                    <div class="mb-3">
-                        <label for="course" class="form-label">Course</label>
-                        <select class="form-control" id="course" name="course" required>
-                            {% for course in user.profile.courses.all %}
-                                <option value="{{ course.id }}">{{ course.full_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="file_upload" class="form-label">Upload File</label>
-                        <input type="file" class="form-control" id="file_upload" name="file_upload" />
-                    </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="due_date" class="form-label">Due Date</label>
+                            <input type="date" 
+                                class="form-control" 
+                                id="due_date" 
+                                name="due_date" 
+                                required />
+                            <div id="due_date_error" class="text-danger" style="display: none;">
+                                Please enter a valid date that is after today with a 4-digit year.
+                            </div>
+                        </div>
+                                        
+                                                                                                                    
+                        <div class="mb-3">
+                            <label for="course" class="form-label">Course</label>
+                            <select class="form-control" id="course" name="course" required>
+                                {% for course in user.profile.courses.all %}
+                                    <option value="{{ course.id }}">{{ course.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="file_upload" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="file_upload" name="file_upload" />
+                        </div>
 
-                    <!-- File Meta Data Section -->
-                    <div class="mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            {% with text="Add File Meta Data ▼" variant="secondary" size="sm" onclick="toggleMetaDataSection()" additional_classes="w-100 justify-content-between" id="keywordsToggleBtn" %}
-                                {% include "button.html" %}
-                            {% endwith %}
-                        </div> 
-                        <div id="metadataContainer" style="display: none;">
-                            <div class="mb-2">
-                                <input type="text" class="form-control" id="file_title" name="file-title" placeholder="File Title" />
-                            </div>
-                            <div class="mb-2">
-                                <textarea class="form-control" id="file_description" name="file-description" rows="2" placeholder="File Description"></textarea>
-                            </div>
-                            <div class="tags-input-container d-flex">
-                                <input type="text" class="form-control me-2" id="keywords-input" placeholder="Add Keyword" />
-                                {% with text="Add" variant="primary" size="sm" onclick="addTag()" %}
+                        <!-- File Meta Data Section -->
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                {% with text="Add File Meta Data ▼" variant="secondary" size="sm" onclick="toggleMetaDataSection()" additional_classes="w-100 justify-content-between" id="keywordsToggleBtn" %}
                                     {% include "button.html" %}
                                 {% endwith %}
+                            </div> 
+                            <div id="metadataContainer" style="display: none;">
+                                <div class="mb-2">
+                                    <input type="text" class="form-control" id="file_title" name="file-title" placeholder="File Title" />
+                                </div>
+                                <div class="mb-2">
+                                    <textarea class="form-control" id="file_description" name="file-description" rows="2" placeholder="File Description"></textarea>
+                                </div>
+                                <div class="tags-input-container d-flex">
+                                    <input type="text" class="form-control me-2" id="keywords-input" placeholder="Add Keyword" />
+                                    {% with text="Add" variant="primary" size="sm" onclick="addTag()" %}
+                                        {% include "button.html" %}
+                                    {% endwith %}
+                                </div>
+                                <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
+                                <input type="hidden" name="keywords" id="keywords" />
                             </div>
-                            <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
-                            <input type="hidden" name="keywords" id="keywords" />
                         </div>
-                    </div>
-                    {% with text="Add" variant="primary" type="submit" %}
-                        {% include "button.html" %}
-                    {% endwith %}
-                </form>
+                        {% with text="Add" variant="primary" type="submit" %}
+                            {% include "button.html" %}
+                        {% endwith %}
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
-{% endif %}
 
 <style>
 /* Modern Container Styling */
