@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from discussions.models import Discussion, Comment
 from courses.models import Course
 
+@tag("discussion_board")
 class DiscussionBoardTest(TestCase):
     def setUp(self):
         # Create a test user
