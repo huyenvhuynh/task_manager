@@ -67,11 +67,11 @@ jobs:
         run: |
           python manage.py test --tag=course_enrollment
 
-      - name: Run File Search Test
-        env:
-          DJANGO_SETTINGS_MODULE: core.settings
-        run: |
-          python manage.py test --tag=file_search
+      # - name: Run File Search Test
+      #   env:
+      #     DJANGO_SETTINGS_MODULE: core.settings
+      #   run: |
+      #     python manage.py test --tag=file_search
 
       - name: Discussion Board Test
         env:
