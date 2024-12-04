@@ -91,3 +91,46 @@ class CourseUnenrollmentTest(TestCase):
 
         # Verify the other user is still in the course
         self.assertIn(self.course, self.other_user.profile.courses.all())
+
+@tag('course_creation')
+class CourseCreationTest(TestCase):
+    def setUp(self):
+        self.creator = User.objects.create_user(username='creator', password='creatorpassword')
+        self.client.login(username='creator', password='creatorpassword')
+
+        self.course = Course.objects.create(
+            full_name="CHEM",
+            description="Test Description",
+            privacy=False,
+            course_number="1234",
+            creator=self.creator
+        )
+
+    def test_duplicate_course_not_allowed(self):
+        # Attempt to create a duplicate course
+        response = self.client.post(reverse('courses:add_course'), {
+            'full_name': "CHEM",
+            'description': "Test Description",
+            'privacy': False,
+            'course_number': "1234"
+        })
+        
+        # Ensure the response contains an error message
+        self.assertEqual(response.status_code, 200)  # Form re-renders on error
+        self.assertContains(response, "Course with this name, description, and code already exists.")
+
+        # Ensure no duplicate course was created
+        self.assertEqual(Course.objects.filter(full_name="Test Course", course_number="1234").count(), 1)
+
+    def test_non_duplicate_course_allowed(self):
+        # Attempt to create a different course
+        response = self.client.post(reverse('courses:add_course'), {
+            'full_name': "PHYS",
+            'description': "Unique Description",
+            'privacy': False,
+            'course_number': "5678"
+        })
+        
+        # Ensure the course is created successfully
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Course.objects.filter(full_name="Unique Course", course_number="5678").count(), 1)

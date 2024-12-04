@@ -84,3 +84,9 @@ jobs:
           DJANGO_SETTINGS_MODULE: core.settings
         run: |
           python manage.py test --tag=course_unenrollment
+
+      - name: Course duplicates not allowed test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=course_creation
