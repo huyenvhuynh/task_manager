@@ -95,9 +95,11 @@ class CourseUnenrollmentTest(TestCase):
 @tag('course_creation')
 class CourseCreationTest(TestCase):
     def setUp(self):
+        # Create a test user
         self.creator = User.objects.create_user(username='creator', password='creatorpassword')
         self.client.login(username='creator', password='creatorpassword')
 
+        # Create an initial course
         self.course = Course.objects.create(
             full_name="CHEM",
             description="Test Description",
@@ -107,30 +109,34 @@ class CourseCreationTest(TestCase):
         )
 
     def test_duplicate_course_not_allowed(self):
-        # Attempt to create a duplicate course
+        # Attempt to create a duplicate course with the same full_name, description, and course_number
         response = self.client.post(reverse('courses:add_course'), {
             'full_name': "CHEM",
             'description': "Test Description",
             'privacy': False,
             'course_number': "1234"
         })
-        
-        # Ensure the response contains an error message
-        self.assertEqual(response.status_code, 200)  # Form re-renders on error
-        self.assertContains(response, "Course with this name, description, and code already exists.")
 
-        # Ensure no duplicate course was created
-        self.assertEqual(Course.objects.filter(full_name="Test Course", course_number="1234").count(), 1)
+        # Ensure the response contains an error message and the form is re-rendered
+        self.assertEqual(response.status_code, 200)  # Form re-renders on error
+        self.assertContains(response, "A course with the name 'CHEM 1234' and identical description already exists.")
+
+        # Verify no duplicate course was created
+        self.assertEqual(Course.objects.filter(full_name="CHEM", course_number="1234").count(), 1)
 
     def test_non_duplicate_course_allowed(self):
-        # Attempt to create a different course
+        # Attempt to create a course with different attributes
         response = self.client.post(reverse('courses:add_course'), {
             'full_name': "PHYS",
             'description': "Unique Description",
             'privacy': False,
             'course_number': "5678"
         })
-        
+
         # Ensure the course is created successfully
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Course.objects.filter(full_name="Unique Course", course_number="5678").count(), 1)
+        self.assertEqual(response.status_code, 302)  # Redirects after successful creation
+        self.assertEqual(Course.objects.filter(full_name="PHYS", course_number="5678").count(), 1)
+
+        # Verify the new course is not affecting the existing one
+        self.assertEqual(Course.objects.filter(full_name="CHEM", course_number="1234").count(), 1)
+
