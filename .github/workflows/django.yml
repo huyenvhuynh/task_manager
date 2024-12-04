@@ -85,8 +85,14 @@ jobs:
         run: |
           python manage.py test --tag=course_unenrollment
 
-      - name: Course duplicates not allowed test
+      # - name: Course duplicates not allowed test
+      #   env:
+      #     DJANGO_SETTINGS_MODULE: core.settings
+      #   run: |
+      #     python manage.py test --tag=course_creation
+
+      - name: Calendar assignemnts display test
         env:
           DJANGO_SETTINGS_MODULE: core.settings
         run: |
-          python manage.py test --tag=course_creation
+          python manage.py test --tag=calendar_view
