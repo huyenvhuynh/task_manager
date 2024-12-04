@@ -38,13 +38,13 @@
     </div>
     {% endif %}
 
-    {% if assignments %}
     <div class="card mb-4">
         <div class="card-header">
             <h3 class="mb-0">In Progress Assignments</h3>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive scrollable-card-content">
+                {% if assignments %}
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
@@ -79,8 +79,9 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <div class="text-center py-4 no-assignments" style="display: none;">
-                    <h5>🎉 No assignments found for this course!</h5>
+                {% endif %}
+                <div class="text-center py-4 {% if assignments %}no-assignments{% endif %}" {% if assignments %}style="display: none;"{% endif %}>
+                    <h5>🎉 No assignments found!</h5>
                 </div>
             </div>
         </div>
@@ -96,6 +97,7 @@
         <div id="completedAssignments" class="collapse">
             <div class="card-body p-0">
                 <div class="table-responsive scrollable-card-content">
+                    {% if user.profile.completed_assignments.all %}
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
@@ -107,34 +109,40 @@
                         </thead>
                         <tbody>
                             {% for assignment in user.profile.completed_assignments.all|dictsort:"due_date" %}
-                            <tr data-bs-toggle="tooltip" 
-                            data-bs-placement="top" 
-                            data-course-id="{{ assignment.course.id }}"
-                            title="{{ assignment.description }}"
-                            style="cursor: pointer"
-                            onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
-                            <td>{{ assignment.due_date|date:"M d, Y" }}</td>
-                            <td>{{ assignment.course.full_name }}</td>
-                            <td>{{ assignment.title }}</td>
-                            <td class="text-center">
-                                <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
-                                    {% csrf_token %}
-                                        <input 
-                                            type="checkbox" 
-                                            onChange="handleCheckbox(event, this.form)"
-                                            checked
-                                        >
-                                    </form>
-                                </td>
-                            </tr>
+                                {% if assignment.course in user.profile.courses.all %}
+                                <tr data-bs-toggle="tooltip" 
+                                    data-bs-placement="top" 
+                                    data-course-id="{{ assignment.course.id }}"
+                                    title="{{ assignment.description }}"
+                                    style="cursor: pointer"
+                                    onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
+                                    <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                                    <td>{{ assignment.course.full_name }}</td>
+                                    <td>{{ assignment.title }}</td>
+                                    <td class="text-center">
+                                        <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
+                                            {% csrf_token %}
+                                            <input 
+                                                type="checkbox" 
+                                                onChange="handleCheckbox(event, this.form)"
+                                                checked
+                                            >
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endif %}
                             {% endfor %}
                         </tbody>
                     </table>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <h5>No completed assignments yet!</h5>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    {% endif %}
 
     <!-- Add Assignment Modal -->
     {% if user.is_authenticated and user.profile.role == 'user' %}

@@ -23,7 +23,7 @@
           </div>
 
           <!-- Calendar Grid -->
-          <table class="table table-bordered">
+          <table class="table table-bordered calendar-table">
             <thead>
               <tr>
                 <th>Sun</th>
@@ -298,6 +298,10 @@
     </script>
 
     <style>
+      .calendar-table {
+        table-layout: fixed;
+        width: 100%;
+      }
       .calendar-container {
         max-width: 800px;
         margin: 0 auto;
@@ -307,7 +311,8 @@
         vertical-align: top;
         padding: 8px;
         position: relative;
-        width: 14.28%; /* Equal width for all 7 days */
+        width: 14.28%;
+        overflow: hidden;
       }
       .calendar-month-year {
         font-size: 1.5rem;
@@ -319,23 +324,41 @@
       }
       .assignment-list {
         font-size: 0.8em;
+        max-width: 100%;
+        max-height: 70px; 
+        overflow-y: auto; /* Enable vertical scrolling */
+        scrollbar-width: thin; 
+      }
+      .assignment-list::-webkit-scrollbar {
+        width: 6px;
+      }
+      .assignment-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      .assignment-list::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
       }
       .assignment-item {
         background-color: #e3f2fd;
         margin: 2px 0;
         padding: 2px 4px;
         border-radius: 3px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
         cursor: pointer;
         transition: background-color 0.2s;
+        max-width: 100%;
+        overflow: hidden;
       }
       .assignment-item:hover {
         background-color: #bbdefb;
       }
       .assignment-title {
         color: #1976d2;
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .today {
         background-color: #e8f5e9;
@@ -343,6 +366,9 @@
       /* Make week view cells taller to accommodate more assignments */
       tr:only-child .calendar-day {
         height: 250px;
+      }
+      tr:only-child .assignment-list {
+        max-height: 220px; /* Adjust for week view */
       }
       /* Remove the outline styles since they're now handled by button.html */
       .calendar-nav-btn {
