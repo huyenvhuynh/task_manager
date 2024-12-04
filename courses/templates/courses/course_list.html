@@ -76,7 +76,7 @@
                                         </a>
                                         <form action="{% url 'courses:unenroll_from_course' course.id %}" method="post" style="margin:0">
                                             {% csrf_token %}
-                                            {% with type="submit" text="Unenroll" variant="secondary" additional_classes="btn-red" %}
+                                            {% with text="Unenroll" variant="danger" type="submit" %}
                                                 {% include "button.html" %}
                                             {% endwith %}
                                         </form>
@@ -172,10 +172,19 @@
 
 {% block scripts %}
 <script>
-    // Add collapse arrow rotation
+    // Make sure we're using the latest loaded version of Bootstrap
+    if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap not loaded properly');
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
         const myCoursesSection = document.getElementById('myCourses');
         const chevron = document.querySelector('.chevron');
+        
+        // Initialize collapse manually
+        const collapse = new bootstrap.Collapse(myCoursesSection, {
+            toggle: false
+        });
         
         myCoursesSection.addEventListener('show.bs.collapse', function () {
             chevron.style.transform = 'rotate(180deg)';
