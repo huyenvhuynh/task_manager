@@ -78,3 +78,9 @@ jobs:
           DJANGO_SETTINGS_MODULE: core.settings
         run: |
           python manage.py test --tag=discussion_board
+
+      - name: Course owner unenrollment Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=course_unenrollment
