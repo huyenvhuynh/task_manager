@@ -78,3 +78,27 @@ jobs:
           DJANGO_SETTINGS_MODULE: core.settings
         run: |
           python manage.py test --tag=discussion_board
+
+      - name: Course owner unenrollment Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=course_unenrollment
+
+      # - name: Course duplicates not allowed test
+      #   env:
+      #     DJANGO_SETTINGS_MODULE: core.settings
+      #   run: |
+      #     python manage.py test --tag=course_creation
+
+      - name: Calendar assignemnts display test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=calendar_view
+
+      # - name: Assignment completion status check test
+      #   env:
+      #     DJANGO_SETTINGS_MODULE: core.settings
+      #   run: |
+      #     python manage.py test --tag=assignment_completion
