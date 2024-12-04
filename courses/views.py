@@ -35,8 +35,11 @@ def create_course_group(request):
             course.creator = request.user
             course.save()
             
-            # Create and associate a permission group
-            group = Group.objects.create(name=course.full_name)
+            # Create a unique group name and get or create the group
+            group_name = f"{course.full_name}_{course.id}"
+            group, created = Group.objects.get_or_create(name=group_name)
+            
+            # Add user to group
             request.user.groups.add(group)
             
             # Auto-enroll the creator
