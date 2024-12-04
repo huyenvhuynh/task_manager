@@ -1,13 +1,10 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
+{% block content %}
 <div class="container mt-5">
   <!-- Back Button -->
   <div class="mb-4">
-    <a
-      href="{% url 'discussions:discussion_list' %}"
-      class="me-2 text-decoration-none"
-    >
-      {% with text="Back to Discussions" variant="secondary"
-      additional_classes="btn-grey" %} {% include "button.html" %} {% endwith %}
+    <a href="{% url 'discussions:discussion_list' %}" class="me-2 text-decoration-none">
+      {% include "button.html" with text="Back to Discussions" variant="secondary" additional_classes="btn-grey" %}
     </a>
   </div>
 
