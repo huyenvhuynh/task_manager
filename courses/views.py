@@ -190,20 +190,12 @@ def unenroll_from_course(request, course_id):
 @login_required
 def delete_course(request, course_id):
     """
-    Delete a course. Only the course creator can delete the course.
-    
-    Args:
-        request: HttpRequest object
-        course_id: ID of the course to delete
-        
-    Returns:
-        HttpResponse: Redirects to course list on successful deletion,
-                     or course detail if user lacks permission
+    Delete a course. Only the course creator or admin can delete the course.
     """
     course = get_object_or_404(Course, id=course_id)
     
-    # Check if user is the course creator
-    if request.user != course.creator:
+    # Check if user is the course creator or an admin
+    if request.user != course.creator and request.user.profile.role != 'admin':
         messages.error(request, "You don't have permission to delete this course.")
         return redirect('courses:course_detail', pk=course_id)
     
@@ -211,6 +203,10 @@ def delete_course(request, course_id):
         course_name = course.full_name
         course.delete()
         messages.success(request, f"Course '{course_name}' has been deleted.")
+        
+        # Redirect admins back to admin course list
+        if request.user.profile.role == 'admin':
+            return redirect('courses:admin_course')
         return redirect('courses:course_list')
         
     return render(request, 'courses/course_confirm_delete.html', {'course': course})
