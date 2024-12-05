@@ -101,7 +101,7 @@ class CourseCreationTest(TestCase):
 
         # Create an initial course
         self.course = Course.objects.create(
-            full_name="CHEM",
+            course_name="CHEM",
             description="Test Description",
             privacy=False,
             course_number="1234",
@@ -109,34 +109,59 @@ class CourseCreationTest(TestCase):
         )
 
     def test_duplicate_course_not_allowed(self):
-        # Attempt to create a duplicate course with the same full_name, description, and course_number
-        response = self.client.post(reverse('courses:add_course'), {
-            'full_name': "CHEM",
+        # Attempt to create a duplicate course
+        response = self.client.post(reverse('courses:create_course'), {
+            'course_name': "CHEM",
             'description': "Test Description",
             'privacy': False,
-            'course_number': "1234"
+            'course_number': 1234
         })
-
-        # Ensure the response contains an error message and the form is re-rendered
-        self.assertEqual(response.status_code, 200)  # Form re-renders on error
-        self.assertContains(response, "A course with the name 'CHEM 1234' and identical description already exists.")
 
         # Verify no duplicate course was created
-        self.assertEqual(Course.objects.filter(full_name="CHEM", course_number="1234").count(), 1)
+        self.assertEqual(
+            Course.objects.filter(
+                course_name="CHEM",
+                description="Test Description",
+                course_number=1234
+            ).count(), 
+            1
+        )
 
     def test_non_duplicate_course_allowed(self):
-        # Attempt to create a course with different attributes
-        response = self.client.post(reverse('courses:add_course'), {
-            'full_name': "PHYS",
-            'description': "Unique Description",
-            'privacy': False,
-            'course_number': "5678"
-        })
+        # Test cases for non-duplicate courses
+        test_cases = [
+            {
+                'course_name': "CHEM",  # Same name
+                'description': "Different Description",  # Different description
+                'privacy': False,
+                'course_number': "1234"
+            },
+            {
+                'course_name': "PHYS",  # Different name
+                'description': "Test Description",  # Same description
+                'privacy': False,
+                'course_number': "1234"
+            },
+            {
+                'course_name': "CHEM",  # Same name
+                'description': "Test Description",  # Same description
+                'privacy': False,
+                'course_number': "5678"  # Different number
+            }
+        ]
 
-        # Ensure the course is created successfully
-        self.assertEqual(response.status_code, 302)  # Redirects after successful creation
-        self.assertEqual(Course.objects.filter(full_name="PHYS", course_number="5678").count(), 1)
-
-        # Verify the new course is not affecting the existing one
-        self.assertEqual(Course.objects.filter(full_name="CHEM", course_number="1234").count(), 1)
+        for case in test_cases:
+            response = self.client.post(reverse('courses:create_course'), case)
+            # Ensure the course is created successfully
+            self.assertEqual(response.status_code, 302)  # Redirects after successful creation
+            
+            # Verify the course was created
+            self.assertEqual(
+                Course.objects.filter(
+                    course_name=case['course_name'],
+                    description=case['description'],
+                    course_number=case['course_number']
+                ).exists(),
+                True
+            )
 

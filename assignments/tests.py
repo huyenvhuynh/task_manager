@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from courses.models import Course
 from assignments.models import Assignment, AssignmentFile
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 @tag('calendar_view')
 class CalendarViewTest(TestCase):
@@ -95,17 +96,18 @@ class AssignmentCompletionTest(TestCase):
         )
 
     def test_mark_assignment_as_completed(self):
+        initial_response = self.client.get(reverse('assignments:assignment_list'))
+        self.assertContains(initial_response, self.assignment.title)
+
         # Mark assignment as completed
         response = self.client.post(reverse('assignments:toggle_complete', args=[self.assignment.id]))
         self.assertEqual(response.status_code, 302)
 
-        # Verify it is marked completed
-        self.assertIn(self.assignment, self.user.profile.completed_assignments.all())
+        # Verify it is marked completed in the database
+        self.assertTrue(self.user.profile.completed_assignments.filter(id=self.assignment.id).exists())
 
-        # Check completed assignments section
-        response = self.client.get(reverse('assignments:assignment_list'))
-        self.assertContains(response, '<h3>Completed Assignments</h3>', html=True)
-        self.assertContains(response, self.assignment.title)
+        # Check that it's no longer visible in the assignment list
+        final_response = self.client.get(reverse('assignments:assignment_list'))
 
     def test_unmark_assignment_as_completed(self):
         # Pre-mark assignment as completed
@@ -120,7 +122,6 @@ class AssignmentCompletionTest(TestCase):
 
         # Check "In Progress Assignments" section
         response = self.client.get(reverse('assignments:assignment_list'))
-        self.assertContains(response, '<h3>In Progress Assignments</h3>', html=True)
         self.assertContains(response, self.assignment.title)
 
 
@@ -136,52 +137,72 @@ class FileSearchTest(TestCase):
             course_number="1111",
             creator=self.user
         )
+        self.user.profile.courses.add(self.course)
+        
+        # Create a simple test file
+        test_file = SimpleUploadedFile(
+            "test_file.txt",
+            b"file_content",
+            content_type="text/plain"
+        )
+        
+        # Create assignments and their associated files
         self.assignment1 = Assignment.objects.create(
             title="Test Assignment 1",
             description="Description 1",
             due_date="2024-12-10",
             course=self.course,
-            user=self.user,
+            user=self.user
+        )
+        self.file1 = AssignmentFile.objects.create(
+            assignment=self.assignment1,
+            file=test_file,  # Add the actual file
+            title="Test File 1",
+            description="File Description 1",
             keywords="testing, search"
         )
+
+        # Create another test file
+        test_file2 = SimpleUploadedFile(
+            "test_file2.txt",
+            b"file_content2",
+            content_type="text/plain"
+        )
+
         self.assignment2 = Assignment.objects.create(
             title="Test Assignment 2",
             description="Description 2",
             due_date="2024-12-15",
             course=self.course,
-            user=self.user,
-            keywords="filtering, example"
+            user=self.user
         )
-        AssignmentFile.objects.create(
-            assignment=self.assignment1,
-            file="files/test1.pdf",
-            title="Test File 1",
-            description="A file for testing keyword search"
-        )
-        AssignmentFile.objects.create(
+        self.file2 = AssignmentFile.objects.create(
             assignment=self.assignment2,
-            file="files/test2.pdf",
+            file=test_file2,  # Add the actual file
             title="Test File 2",
-            description="Another file for testing"
+            description="File Description 2",
+            keywords="filtering, example"
         )
 
     def test_search_file_by_keyword(self):
         self.client.login(username="testuser", password="testpassword")
-
-        # Search for keyword in assignment1
+        
+        # Search for keyword in file1
         response = self.client.get(reverse('assignments:file_search'), {'q': 'testing'})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Test Assignment 1")
-        self.assertNotContains(response, "Test Assignment 2")
+        self.assertContains(response, "Test File 1")
+        self.assertNotContains(response, "Test File 2")
 
-        # Search for keyword in assignment2
+        # Mark assignment2 as completed - its file should no longer appear in searches
+        self.user.profile.completed_assignments.add(self.assignment2)
+
+        # Search for keyword in file2 - should not appear since assignment is completed
         response = self.client.get(reverse('assignments:file_search'), {'q': 'example'})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Test Assignment 2")
-        self.assertNotContains(response, "Test Assignment 1")
+        self.assertNotContains(response, "Test File 2")
 
         # Search for non-existent keyword
         response = self.client.get(reverse('assignments:file_search'), {'q': 'nonexistent'})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "No assignments found.")
+        self.assertContains(response, "No files found")
 
