@@ -80,13 +80,6 @@
               </li>
               
             {% endif %}
-            <li class="nav-item">
-              <a
-                class="nav-link nav-search"
-                href="{% url 'assignments:file_search' %}"
-                >Search</a
-              >
-            </li>
             {% if user.profile.role == 'admin' %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'assignments:admin_assignment_list' %}">Assignments</a>
@@ -98,6 +91,13 @@
                 class="nav-link nav-discussions"
                 href="{% url 'discussions:discussion_list' %}"
                 >Discussions</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link nav-search"
+                href="{% url 'assignments:file_search' %}"
+                >Search</a
               >
             </li>
             {% endif %}
