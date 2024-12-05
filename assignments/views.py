@@ -133,25 +133,13 @@ def assignment_list(request):
 @login_required
 def delete_assignment(request, assignment_id):
     """
-    Delete an assignment if the user has appropriate permissions.
-
-    Args:
-        request: HttpRequest object
-        assignment_id: ID of the assignment to delete
-
-    Returns:
-        HttpResponse: Redirect to appropriate assignment list based on user type
+    Delete an assignment if user is admin.
     """
-    assignment = get_object_or_404(Assignment,
-                                id=assignment_id,
-                                course__in=request.user.profile.courses.all())
-    if assignment.user == request.user:
-        assignment.delete()
-    
-    # Redirect based on user role
     if request.user.profile.role == 'admin':
+        assignment = get_object_or_404(Assignment, id=assignment_id)
+        assignment.delete()
         return redirect('assignments:admin_assignment_list')
-    return redirect('assignments:file_search')
+    return HttpResponseForbidden()
 
 
 @login_required
