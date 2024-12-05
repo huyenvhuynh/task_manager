@@ -133,7 +133,12 @@
           <p><strong>Description:</strong> {{ file.description }}</p>
         {% endif %}
         {% if assignment.keywords %}
-          <p><strong>Keywords:</strong> {{ assignment.keywords }}</p>
+          <div class="keywords">
+            <strong>Keywords:</strong>
+            {% for keyword in assignment.keyword_list %}
+            <span class="keyword-tag">{{ keyword }}</span>
+            {% endfor %}
+          </div>
         {% endif %}
         {% if file.uploaded_at %}
           <p><strong>Uploaded:</strong> {{ file.uploaded_at|date:"F j, Y, g:i a" }}</p>
@@ -279,6 +284,20 @@
     align-items: center;
     justify-content: center;
     color: #6c757d;
+}
+
+.keywords {
+    margin-top: 10px;
+}
+
+.keyword-tag {
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 0.85em;
 }
 </style>
 

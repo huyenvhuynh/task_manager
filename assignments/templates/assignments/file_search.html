@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container mt-5">
   <h1>File Search</h1>
-  {% if assignments %}
+  {% if files %}
   <!-- Search Bar -->
   <div class="d-flex justify-content-end mb-3">
     <form action="" method="get" class="input-group">
@@ -12,52 +12,43 @@
       {% endwith %}
     </form>
   </div>
-  <!-- List of Assignments -->
+  <!-- List of Files -->
   <ul class="list-group">
-    {% for assignment in assignments %}
-    {% if assignment not in user.profile.completed_assignments.all %}
+    {% for file in files %}
     <li class="list-group-item shadow-card">
       <div class="d-flex justify-content-between align-items-start">
-        <h5>{{ assignment.title }}</h5>
-        <span class="badge bg-primary">{{ assignment.course.full_name }}</span>
+        <h5>{{ file.title }}</h5>
+        <span class="badge bg-primary">{{ file.assignment.course.full_name }}</span>
       </div>
-      <p>{{ assignment.description }}</p>
-      <p>Due Date: {{ assignment.due_date }}</p>
-      <p>Uploaded At: {{ assignment.uploaded_at }}</p>
-      {% if assignment.file_upload %}
-      <p>
-        File:
-        <a href="{{ assignment.file_upload.url }}"
-          >{{ assignment.file_upload.name }}</a
-        >
-      </p>
+      {% if file.description %}
+      <p>{{ file.description }}</p>
+      {% endif %}
+      <p>Uploaded At: {{ file.uploaded_at }}</p>
       
       <!-- Displaying keywords -->
-      {% if assignment.keywords %}
+      {% if file.assignment.keywords %}
       <div class="keywords">
         <strong>Keywords:</strong>
-        {% for keyword in assignment.keyword_list %}
+        {% for keyword in file.assignment.keyword_list %}
         <span class="keyword-tag">{{ keyword }}</span>
         {% endfor %}
       </div>
-      {% else %}
-      <p>No keywords added.</p>
-      {% endif %}
-      {% else %}
-      <p>No file uploaded.</p>
       {% endif %}
 
       <div>
-        <a
-          href="{% url 'assignments:edit_assignment' assignment.id %}"
+        <button 
+          type="button"
           class="btn btn-secondary btn-sm"
-          >View and Edit</a
-        >
-        {% if assignment.user == user %}  <!-- Only show delete to creator -->
+          data-bs-toggle="modal" 
+          data-bs-target="#fileModal{{ file.id }}">
+          View
+        </button>
+        {% if file.assignment.user == user %}
         <form
-          action="{% url 'assignments:delete_assignment' assignment.id %}"
+          action="{% url 'assignments:delete_file' file.assignment.id file.id %}"
           method="post"
           style="display: inline"
+          onsubmit="return confirm('Are you sure you want to delete this file?');"
         >
           {% csrf_token %}
           {% with text="Delete" variant="secondary" type="submit" additional_classes="btn-red btn-sm" %}
@@ -67,9 +58,41 @@
         {% endif %}
       </div>
     </li>
-    {% endif %}
     {% endfor %}
   </ul>
+
+  <!-- File Modals -->
+  {% for file in files %}
+  <div class="modal" id="fileModal{{ file.id }}" tabindex="-1" aria-labelledby="fileModalLabel{{ file.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fileModalLabel{{ file.id }}">{{ file.title }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% if file.description %}
+            <p><strong>Description:</strong> {{ file.description }}</p>
+          {% endif %}
+          {% if file.assignment.keywords %}
+            <div class="keywords">
+              <strong>Keywords:</strong>
+              {% for keyword in file.assignment.keyword_list %}
+              <span class="keyword-tag">{{ keyword }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+          {% if file.uploaded_at %}
+            <p><strong>Uploaded:</strong> {{ file.uploaded_at|date:"F j, Y, g:i a" }}</p>
+          {% endif %}
+          
+          <embed src="{{ file.file.url }}" width="100%" height="500px">
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
   {% else %}
   <!-- Search Bar -->
   <div class="d-flex justify-content-end mb-3">
@@ -80,10 +103,11 @@
       {% endwith %}
     </form>
   </div>
-  <p>No assignments found.</p>
+  <p>No files found.</p>
   {% endif %}
 </div>
 
+<!-- Keep existing styles -->
 <style>
   .keywords {
     margin-top: 10px;
@@ -99,20 +123,17 @@
     font-size: 0.85em;
   }
 
-  /* Add some styling for the course badge */
   .badge {
     font-size: 0.9em;
     padding: 8px 12px;
   }
 
-  /* Improve spacing in list items */
   .list-group-item {
     margin-bottom: 10px;
   }
 
-  /* Add some margin to the actions div */
   .list-group-item > div:last-child {
     margin-top: 15px;
   }
 </style>
-{% endblock %}
+{% endblock %} 
