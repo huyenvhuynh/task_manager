@@ -232,7 +232,7 @@ def file_search(request):
         for assignment in assignments:
             if assignment.keywords:
                 keywords = [k.strip().lower() for k in assignment.keywords.split(",")]
-                if any(search_query in keyword for keyword in keywords):
+                if search_query in keywords:
                     filtered_assignments.append(assignment)
         assignments = filtered_assignments
 

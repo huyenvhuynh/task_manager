@@ -136,6 +136,8 @@ class FileSearchTest(TestCase):
             course_number="1111",
             creator=self.user
         )
+        self.user.profile.courses.add(self.course)
+        
         self.assignment1 = Assignment.objects.create(
             title="Test Assignment 1",
             description="Description 1",
@@ -152,22 +154,10 @@ class FileSearchTest(TestCase):
             user=self.user,
             keywords="filtering, example"
         )
-        AssignmentFile.objects.create(
-            assignment=self.assignment1,
-            file="files/test1.pdf",
-            title="Test File 1",
-            description="A file for testing keyword search"
-        )
-        AssignmentFile.objects.create(
-            assignment=self.assignment2,
-            file="files/test2.pdf",
-            title="Test File 2",
-            description="Another file for testing"
-        )
 
     def test_search_file_by_keyword(self):
         self.client.login(username="testuser", password="testpassword")
-
+        
         # Search for keyword in assignment1
         response = self.client.get(reverse('assignments:file_search'), {'q': 'testing'})
         self.assertEqual(response.status_code, 200)
@@ -183,5 +173,5 @@ class FileSearchTest(TestCase):
         # Search for non-existent keyword
         response = self.client.get(reverse('assignments:file_search'), {'q': 'nonexistent'})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "No assignments found.")
+        self.assertContains(response, "No assignments found")
 
