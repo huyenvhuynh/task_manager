@@ -15,7 +15,6 @@ class Assignment(models.Model):
         user (ForeignKey): The user who created the assignment, linked via a foreign key.
         course (ForeignKey): The course to which the assignment belongs, linked via a foreign key.
         uploaded_at (DateTimeField): The timestamp indicating when the assignment was uploaded.
-        keywords (CharField): Optional, comma-separated keywords for the assignment, aiding in categorization or search.
     """
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -23,7 +22,6 @@ class Assignment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignments')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assignments')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated keywords")
 
     def __str__(self) -> str:
         """
@@ -47,6 +45,7 @@ class AssignmentFile(models.Model):
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated keywords")
 
     def __str__(self) -> str:
         return self.title or "Untitled File"

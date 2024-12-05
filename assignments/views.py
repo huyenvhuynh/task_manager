@@ -75,8 +75,7 @@ def add_assignment(request):
             description=description,
             due_date=due_date,
             user=request.user,
-            course=course,
-            keywords=request.POST.get('keywords')
+            course=course
         )
         assignment.save()
 
@@ -85,15 +84,16 @@ def add_assignment(request):
             validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
             try:
                 validator(file_upload)
-                # Create AssignmentFile
+                # Create AssignmentFile with keywords
                 AssignmentFile.objects.create(
                     assignment=assignment,
                     file=file_upload,
                     title=request.POST.get('file-title') or file_upload.name,
-                    description=request.POST.get('file-description')
+                    description=request.POST.get('file-description'),
+                    keywords=request.POST.get('keywords')
                 )
             except ValidationError as e:
-                assignment.delete()  # Rollback assignment creation
+                assignment.delete()
                 return HttpResponseBadRequest('Invalid file type.')
 
         return redirect('assignments:assignment_list')
@@ -122,10 +122,6 @@ def assignment_list(request):
         completed_by=request.user.profile
     )
 
-    # Process keywords for display
-    for assignment in assignments:
-        if assignment.keywords:
-            assignment.keyword_list = [k.strip() for k in assignment.keywords.split(",")]
 
     return render(request, 'assignments/assignment_list.html', {
         'assignments': assignments,
@@ -167,8 +163,12 @@ def edit_assignment(request, assignment_id):
                                 id=assignment_id,
                                 course__in=request.user.profile.courses.all())
 
-    if assignment.keywords:
-        assignment.keyword_list = [k.strip() for k in assignment.keywords.split(",")]
+    # Process keywords for each file
+    for file in assignment.files.all():
+        if file.keywords:
+            file.keyword_list = [k.strip() for k in file.keywords.split(",")]
+        else:
+            file.keyword_list = []
 
     if request.method == 'POST':
         # If there's a file upload, create a new AssignmentFile
@@ -177,16 +177,13 @@ def edit_assignment(request, assignment_id):
             validator = FileExtensionValidator(['txt', 'pdf', 'jpg'])
             try:
                 validator(file_upload)
-                # Update assignment keywords if provided
-                if request.POST.get('keywords'):
-                    assignment.keywords = request.POST.get('keywords')
-                    assignment.save()
-                
+                # Create new file with keywords
                 AssignmentFile.objects.create(
                     assignment=assignment,
                     file=file_upload,
                     title=request.POST.get('file-title') or file_upload.name,
-                    description=request.POST.get('file-description')
+                    description=request.POST.get('file-description'),
+                    keywords=request.POST.get('keywords')
                 )
                 return redirect('assignments:edit_assignment', assignment_id=assignment_id)
             except ValidationError:
@@ -231,31 +228,32 @@ def file_search(request):
     """
     search_query = request.GET.get('q', '').strip().lower()
     
-    user_courses = request.user.profile.courses.all()
-    # Get assignments that aren't completed by the user
-    uncompleted_assignments = Assignment.objects.filter(
-        course__in=user_courses
-    ).exclude(completed_by=request.user.profile)
-    
-    # Get all files from uncompleted assignments
-    files = AssignmentFile.objects.filter(
-        assignment__in=uncompleted_assignments
-    )
+    if request.user.profile.role == 'admin':
+        files = AssignmentFile.objects.all()
+        user_courses = Course.objects.all()
+    else:
+        user_courses = request.user.profile.courses.all()
+        uncompleted_assignments = Assignment.objects.filter(
+            course__in=user_courses
+        ).exclude(completed_by=request.user.profile)
+        files = AssignmentFile.objects.filter(
+            assignment__in=uncompleted_assignments
+        )
 
     # Filter files based on keyword match
     if search_query:
         filtered_files = []
         for file in files:
-            if file.assignment.keywords:
-                keywords = [k.strip().lower() for k in file.assignment.keywords.split(",")]
+            if file.keywords:
+                keywords = [k.strip().lower() for k in file.keywords.split(",")]
                 if search_query in keywords:
                     filtered_files.append(file)
         files = filtered_files
 
     # Process keywords for display
     for file in files:
-        if file.assignment.keywords:
-            file.assignment.keyword_list = [k.strip() for k in file.assignment.keywords.split(",")]
+        if file.keywords:
+            file.keyword_list = [k.strip() for k in file.keywords.split(",")]
 
     return render(request, 'assignments/file_search.html', {
         'files': files,
@@ -314,9 +312,9 @@ def delete_file(request, assignment_id, file_id):
         
     assignment = get_object_or_404(Assignment, id=assignment_id)
     
-    # Check if user has permission to modify this assignment
-    if assignment.course not in request.user.profile.courses.all():
-        return HttpResponseForbidden()
+    if not request.user.profile.role == 'admin':
+        if assignment.course not in request.user.profile.courses.all():
+            return HttpResponseForbidden()
         
     file = get_object_or_404(AssignmentFile, id=file_id, assignment=assignment)
     file.delete()

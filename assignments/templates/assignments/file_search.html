@@ -26,10 +26,10 @@
       <p>Uploaded At: {{ file.uploaded_at }}</p>
       
       <!-- Displaying keywords -->
-      {% if file.assignment.keywords %}
+      {% if file.keywords %}
       <div class="keywords">
         <strong>Keywords:</strong>
-        {% for keyword in file.assignment.keyword_list %}
+        {% for keyword in file.keyword_list %}
         <span class="keyword-tag">{{ keyword }}</span>
         {% endfor %}
       </div>
@@ -43,7 +43,7 @@
           data-bs-target="#fileModal{{ file.id }}">
           View
         </button>
-        {% if file.assignment.user == user %}
+        {% if file.assignment.user == user or user.profile.role == 'admin' %}
         <form
           action="{% url 'assignments:delete_file' file.assignment.id file.id %}"
           method="post"
@@ -74,10 +74,10 @@
           {% if file.description %}
             <p><strong>Description:</strong> {{ file.description }}</p>
           {% endif %}
-          {% if file.assignment.keywords %}
+          {% if file.keywords %}
             <div class="keywords">
               <strong>Keywords:</strong>
-              {% for keyword in file.assignment.keyword_list %}
+              {% for keyword in file.keyword_list %}
               <span class="keyword-tag">{{ keyword }}</span>
               {% endfor %}
             </div>
