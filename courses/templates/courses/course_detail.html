@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">{{ course.full_name }}</h3>
+                        {% if course.privacy %}
+                            <span class="badge bg-danger">Private</span>
+                        {% else %}
+                            <span class="badge bg-success">Public</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Course Content - Always Visible -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>Course Name:</strong></p>
+                            <p class="text-muted">{{ course.course_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Course Number:</strong></p>
+                            <p class="text-muted">{{ course.course_number }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <p><strong>Description:</strong></p>
+                            <p class="text-muted">{{ course.description }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <p><strong>Created by:</strong></p>
+                            <p class="text-muted">{{ course.creator.username }}</p>
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated and user in course.enrolled_users.all %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h4 class="mb-3">Course Members</h4>
+                                <div class="list-group">
+                                    <!-- Show creator first -->
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            {{ course.creator.username }}
+                                            <span class="badge bg-warning text-dark ms-2">Owner</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Show other enrolled users -->
+                                    {% for enrolled_user in course.enrolled_users.all %}
+                                        {% if enrolled_user != course.creator %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    {{ enrolled_user.username }}
+                                                    <span class="badge bg-info ms-2">Member</span>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if course.privacy and not user_has_access and user.profile.role != 'admin' %}
+                        <!-- Enrollment Request Section for Private Courses -->
+                        <div class="alert alert-info mt-4">
+                            <p>This is a private course. You need to request enrollment to access course materials.</p>
+                            {% if enrollment_request %}
+                                {% if enrollment_request.status == 'PENDING' %}
+                                    <div class="alert alert-warning">
+                                        Your enrollment request is pending approval.
+                                    </div>
+                                {% elif enrollment_request.status == 'REJECTED' %}
+                                    <div class="alert alert-danger">
+                                        Your enrollment request was rejected.
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <form action="{% url 'courses:request_enrollment' course.id %}" method="post" class="mt-3">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">Request Enrollment</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if is_creator and user.profile.role != 'admin' %}
+                        <!-- Enrollment Requests Section -->
+                        <div class="mt-4">
+                            <h4>Enrollment Requests</h4>
+                            {% if pending_requests %}
+                                <div class="list-group">
+                                    {% for request in pending_requests %}
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ request.user.username }}
+                                            <div class="btn-group">
+                                                <form action="{% url 'courses:manage_enrollment_request' request.id 'approve' %}" method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    {% with type="submit" text="Approve" variant="secondary" additional_classes="btn-green btn-sm" %}
+                                                        {% include "button.html" %}
+                                                    {% endwith %}
+                                                </form>
+                                                <form action="{% url 'courses:manage_enrollment_request' request.id 'reject' %}" method="post" class="d-inline ms-2">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-secondary btn-red btn-sm">Reject</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No pending enrollment requests.</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <a href="{% url 'courses:course_list' %}">
+                            {% with text="Back to Courses" variant="secondary" additional_classes="btn-grey" %}
+                                {% include "button.html" %}
+                            {% endwith %}
+                        </a>
+                        
+                        {% if is_creator %}
+                        <div>
+                            {% if user.profile.role != 'admin' %}
+                            <a href="{% url 'courses:edit_course_description' course_id=course.id %}" 
+                               class="btn btn-secondary me-2">
+                                Edit Description
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'courses:delete_course' course_id=course.id %}" 
+                               class="btn btn-secondary btn-red">
+                                Delete Course
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background: linear-gradient(145deg, #f8f9fa, #fff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.badge.bg-warning {
+    font-weight: 500;
+}
+
+.badge.bg-info {
+    font-weight: 500;
+}
+</style>
+{% endblock %}

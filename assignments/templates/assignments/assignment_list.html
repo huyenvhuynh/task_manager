@@ -1,0 +1,551 @@
+{% extends 'base.html' %}
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+{% block content %}
+<div class="container mt-3">
+    {% if user.profile.courses.all %}
+    <div class="row mb-3">
+        <!-- Add Assignment Button -->
+        <div class="col">
+            {% if user.is_authenticated and user.profile.role == 'user' %}
+                {% with text="Add Assignment" variant="primary" data_bs_toggle="modal" data_bs_target="#addAssignmentModal" %}
+                    {% include "button.html" %}
+                {% endwith %}
+            {% endif %}
+        </div>
+        <!-- Course Filter -->
+        <div class="col-auto">
+            <select class="form-select" id="courseFilter">
+                <option value="all">All Courses</option>
+                {% for course in user.profile.courses.all %}
+                    <option value="{{ course.id }}">{{ course.full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center my-5">
+        <h4 class="text-muted mb-4">You are not enrolled in any courses! Please enroll in a course to view your assignments.</h4>
+        <a href="{% url 'courses:course_list' %}">
+            {% with text="Enroll in Courses" variant="secondary" %}
+                {% include "button.html" %}
+            {% endwith %}
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="mb-0">In Progress Assignments</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive scrollable-card-content">
+                {% if assignments %}
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Due Date</th>
+                            <th>Course</th>
+                            <th>Assignment</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for assignment in assignments|dictsort:"due_date" %}
+                        <tr data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            data-course-id="{{ assignment.course.id }}"
+                            title="{{ assignment.description }}"
+                            style="cursor: pointer"
+                            onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
+                            <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                            <td>{{ assignment.course.full_name }}</td>
+                            <td>{{ assignment.title }}</td>
+                            <td class="text-center">
+                                <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
+                                    {% csrf_token %}
+                                    <input 
+                                        type="checkbox" 
+                                        onChange="handleCheckbox(event, this.form)"
+                                        {% if assignment in user.profile.completed_assignments.all %}checked{% endif %}
+                                    >
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+                <div class="text-center py-4 {% if assignments %}no-assignments{% endif %}" {% if assignments %}style="display: none;"{% endif %}>
+                    <h5>🎉 No assignments found!</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" role="button" data-bs-toggle="collapse" data-bs-target="#completedAssignments" aria-expanded="false">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Completed Assignments</h3>
+                <span class="chevron">▼</span>
+            </div>
+        </div>
+        <div id="completedAssignments" class="collapse">
+            <div class="card-body p-0">
+                <div class="table-responsive scrollable-card-content">
+                    {% if user.profile.completed_assignments.all %}
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Due Date</th>
+                                <th>Course</th>
+                                <th>Assignment</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in user.profile.completed_assignments.all|dictsort:"due_date" %}
+                                {% if assignment.course in user.profile.courses.all %}
+                                <tr data-bs-toggle="tooltip" 
+                                    data-bs-placement="top" 
+                                    data-course-id="{{ assignment.course.id }}"
+                                    title="{{ assignment.description }}"
+                                    style="cursor: pointer"
+                                    onclick=window.location="{% url 'assignments:edit_assignment' assignment.id %}">
+                                    <td>{{ assignment.due_date|date:"M d, Y" }}</td>
+                                    <td>{{ assignment.course.full_name }}</td>
+                                    <td>{{ assignment.title }}</td>
+                                    <td class="text-center">
+                                        <form action="{% url 'assignments:toggle_complete' assignment.id %}" method="post" style="margin:0" onclick="event.stopPropagation()">
+                                            {% csrf_token %}
+                                            <input 
+                                                type="checkbox" 
+                                                onChange="handleCheckbox(event, this.form)"
+                                                checked
+                                            >
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <h5>No completed assignments yet!</h5>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Assignment Modal -->
+    {% if user.is_authenticated and user.profile.role == 'user' %}
+    <div class="modal" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addAssignmentModalLabel">New Assignment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Modal Body with Form -->
+                <div class="modal-body">
+                    <form action="{% url 'assignments:add_assignment' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}" />
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="due_date" class="form-label">Due Date</label>
+                            <input type="date" 
+                                class="form-control" 
+                                id="due_date" 
+                                name="due_date" 
+                                required />
+                            <div id="due_date_error" class="text-danger" style="display: none;">
+                                Please enter a valid date that is after today with a 4-digit year.
+                            </div>
+                        </div>
+                                        
+                                                                                                                    
+                        <div class="mb-3">
+                            <label for="course" class="form-label">Course</label>
+                            <select class="form-control" id="course" name="course" required>
+                                {% for course in user.profile.courses.all %}
+                                    <option value="{{ course.id }}">{{ course.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="file_upload" class="form-label">Upload File</label>
+                            <input type="file" class="form-control" id="file_upload" name="file_upload" />
+                        </div>
+
+                        <!-- File Meta Data Section -->
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                {% with text="Add File Meta Data ▼" variant="secondary" size="sm" onclick="toggleMetaDataSection()" additional_classes="w-100 justify-content-between" id="keywordsToggleBtn" %}
+                                    {% include "button.html" %}
+                                {% endwith %}
+                            </div> 
+                            <div id="metadataContainer" style="display: none;">
+                                <div class="mb-2">
+                                    <input type="text" class="form-control" id="file_title" name="file-title" placeholder="File Title" />
+                                </div>
+                                <div class="mb-2">
+                                    <textarea class="form-control" id="file_description" name="file-description" rows="2" placeholder="File Description"></textarea>
+                                </div>
+                                <div class="tags-input-container d-flex">
+                                    <input type="text" class="form-control me-2" id="keywords-input" placeholder="Add Keyword" />
+                                    {% with text="Add" variant="primary" size="sm" onclick="addTag()" %}
+                                        {% include "button.html" %}
+                                    {% endwith %}
+                                </div>
+                                <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
+                                <input type="hidden" name="keywords" id="keywords" />
+                            </div>
+                        </div>
+                        {% with text="Add" variant="primary" type="submit" %}
+                            {% include "button.html" %}
+                        {% endwith %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* Modern Container Styling */
+.container {
+    max-width: 1140px;
+    padding: 2rem;
+}
+
+/* Card Styling */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(145deg, #f8f9fa, #fff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.card-header h3 {
+    color: #2d3436;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+/* Table Styling */
+.table {
+    margin: 0;
+}
+
+.table thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.5rem;
+}
+
+.table td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    color: #2d3436;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Scrollbar Styling */
+.scrollable-card-content {
+    height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.scrollable-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Button & Filter Styling */
+
+
+.form-select {
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0.625rem 2.25rem 0.625rem 1.25rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.form-select:focus {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3498db;
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid #3498db;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+/* No Assignments Message */
+.no-assignments {
+    padding: 3rem 1.5rem;
+    color: #6c757d;
+}
+
+.no-assignments h5 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Chevron Styling */
+.chevron {
+    color: #3498db;
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+/* Row Hover Effect */
+.table tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* Spacing */
+.mb-3 {
+    margin-bottom: 1.5rem !important;
+}
+
+.row {
+    align-items: center;
+}
+
+/* Page Title */
+h1 {
+    color: #2d3436;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<script>
+    function fireConfetti() {
+        confetti({
+            particleCount: 150,
+            spread: 180,
+            origin: { y: 0.6 }
+        });
+    }
+
+    function handleCheckbox(event, form) {
+        // Only trigger confetti when checking the box (completing assignment)
+        if (!event.target.checked) {
+            form.submit();
+            return;
+        }
+        
+        // Prevent the default form submission
+        event.preventDefault();
+        
+        // Fire confetti
+        fireConfetti();
+        
+        // Submit the form after a short delay
+        setTimeout(() => {
+            form.submit();
+        }, 400);
+    }
+
+    // ensuring valid due date
+    document.addEventListener('DOMContentLoaded', () => {
+        const dueDateInput = document.getElementById('due_date');
+        const errorDiv = document.getElementById('due_date_error');
+
+        // Set today's date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        function isValidDate(dateString) {
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(dateString)) return false;
+
+            const [year, month, day] = dateString.split('-');
+            if (year.length !== 4) return false; // year must be exactly 4 digits
+
+            const date = new Date(dateString);
+            return !isNaN(date.getTime()); 
+        }
+
+        // validate the date on input
+        dueDateInput.addEventListener('input', () => {
+            const inputValue = dueDateInput.value; 
+            const inputDate = new Date(inputValue); 
+
+            // Check if the date is valid, has a 4-digit year, and is after today
+            if (!isValidDate(inputValue) || inputDate <= today) {
+                errorDiv.style.display = 'block'; //error message
+                dueDateInput.setCustomValidity('Please enter a valid date'); // prevent form submission
+            } else {
+                errorDiv.style.display = 'none'; 
+                dueDateInput.setCustomValidity(''); 
+            }
+        });
+    });
+
+
+
+    // Initialize tooltips; needed to view assignment description on hover
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+    document.getElementById('addAssignmentModal').addEventListener('hidden.bs.modal', function () {
+        window.location.reload();
+    });
+
+    function addTag() {
+        const input = document.getElementById("keywords-input");
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+
+        let tag = input.value.trim();
+        if (tag) {
+            const tagElement = document.createElement("span");
+            tagElement.className = "tag";
+            tagElement.textContent = tag;
+
+            const deleteButton = document.createElement("span");
+            deleteButton.className = "tag-delete";
+            deleteButton.textContent = "×  ";
+            deleteButton.onclick = function () {
+                tagsDisplay.removeChild(tagElement);
+                updateHiddenInput();
+            };
+
+            tagElement.appendChild(deleteButton);
+            tagsDisplay.appendChild(tagElement);
+
+            input.value = "";
+            updateHiddenInput();
+        }
+    }
+
+    function updateHiddenInput() {
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+
+        let tags = Array.from(tagsDisplay.getElementsByClassName("tag")).map(
+            (tag) => tag.textContent.replace("×", "").trim()
+        );
+
+        hiddenInput.value = tags.join(",");
+    }
+
+    function toggleMetaDataSection() {
+        const metadataContainer = document.getElementById("metadataContainer");
+        const toggleBtn = document.getElementById("keywordsToggleBtn");
+
+        if (metadataContainer.style.display === "none") {
+            metadataContainer.style.display = "block";
+            toggleBtn.textContent = "Add File Meta Data ▲";
+        } else {
+            metadataContainer.style.display = "none";
+            toggleBtn.textContent = "Add File Meta Data ▼";
+        }
+    }
+
+    //collapse arrow rotation
+    document.addEventListener('DOMContentLoaded', function() {
+        const completedSection = document.getElementById('completedAssignments');
+        const chevron = document.querySelector('.chevron');
+        
+        completedSection.addEventListener('show.bs.collapse', function () {
+            chevron.style.transform = 'rotate(180deg)';
+        });
+        
+        completedSection.addEventListener('hide.bs.collapse', function () {
+            chevron.style.transform = 'rotate(0deg)';
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const courseFilter = document.getElementById('courseFilter');
+        
+        courseFilter.addEventListener('change', function() {
+            const selectedCourseId = this.value;
+            const allRows = document.querySelectorAll('.card.mb-4 tr[data-course-id]'); // Only get rows from first card
+            let hasVisibleRows = false;
+            
+            allRows.forEach(row => {
+                const isVisible = selectedCourseId === 'all' || row.getAttribute('data-course-id') === selectedCourseId;
+                row.style.display = isVisible ? '' : 'none';
+                if (isVisible) hasVisibleRows = true;
+            });
+
+            document.querySelector('.no-assignments').style.display = hasVisibleRows ? 'none' : 'block';
+        });
+    });
+</script>
+{% endblock %}

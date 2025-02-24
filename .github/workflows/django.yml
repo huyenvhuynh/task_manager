@@ -1,0 +1,104 @@
+name: Django CI
+
+on:
+  push:
+    branches: ["main", "unitTesting"]
+  pull_request:
+    branches: ["main", "unitTesting"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12.6"]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run HTTPS Settings Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+          GOOGLE_OAUTH_CLIENT_ID: "test_client_id"
+          GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"
+        run: |
+          python manage.py test --tag=https
+
+      - name: Run Workflow Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+          GOOGLE_OAUTH_CLIENT_ID: "test_client_id"
+          GOOGLE_OAUTH_CLIENT_SECRET: "test_client_secret"
+        run: |
+          python manage.py test --tag=workflow
+
+      - name: Run Login Page Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=login
+
+      - name: Run Homepage Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=homepage
+
+      - name: Run Unauthenticated Access Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=assignment_access
+
+      - name: Run Course Enrollment Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=course_enrollment
+
+      # - name: Run File Search Test
+      #   env:
+      #     DJANGO_SETTINGS_MODULE: core.settings
+      #   run: |
+      #     python manage.py test --tag=file_search
+
+      - name: Discussion Board Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=discussion_board
+
+      - name: Course owner unenrollment Test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=course_unenrollment
+
+      # - name: Course duplicates not allowed test
+      #   env:
+      #     DJANGO_SETTINGS_MODULE: core.settings
+      #   run: |
+      #     python manage.py test --tag=course_creation
+
+      - name: Calendar assignemnts display test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=calendar_view
+
+      - name: Assignment completion status check test
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+        run: |
+          python manage.py test --tag=assignment_completion

@@ -1,0 +1,290 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Task Planner{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> -->
+  </head>
+  <body>
+    <!--Nav Bar-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <!-- Navbar Toggler for Mobile View -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Navbar Links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <i class="bi bi-check2-square"></i>
+            <li class="nav-item logo_title">
+              <a class="nav-link" href="{% url 'home' %}">TASK PLANNER</a>
+            </li>
+            <li class="nav-item">
+            </ul>
+          <ul class="navbar-nav mx-auto">
+
+              <a class="nav-link" href="{% url 'home' %}">Home</a>
+              <!-- <li class="nav-item">
+                {% if request.resolver_match.url_name == 'home' %}
+                  <a class="nav-link" href="#about">About</a>
+                {% else %}
+                  <a class="nav-link" href="{% url 'home' %}#about">About</a> 
+                {% endif %}
+              </li> -->
+            <!-- Links for common users -->
+            <li class="nav-item">
+              <a
+                class="nav-link nav-courses"
+                href="{% url 'courses:course_list' %}"
+                >Courses</a
+              >
+            </li>
+             {% if user.profile.role == 'user' %}
+              <li class="nav-item">
+                <a
+                  class="nav-link nav-assignments"
+                  href="{% url 'assignments:assignment_list' %}"
+                  >My Assignments</a
+                >
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link nav-calendar"
+                  href="{% url 'assignments:calendar' %}"
+                  >Calendar</a
+                >
+              </li>
+              
+            {% endif %}
+            {% if user.profile.role == 'admin' %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'assignments:admin_assignment_list' %}">Assignments</a>
+            </li>
+            {% endif %}
+            {% if user.profile.role == 'user' or user.profile.role == 'admin' %}
+            <li class="nav-item">
+              <a
+                class="nav-link nav-discussions"
+                href="{% url 'discussions:discussion_list' %}"
+                >Discussions</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link nav-search"
+                href="{% url 'assignments:file_search' %}"
+                >Search</a
+              >
+            </li>
+            {% endif %}
+          </ul>
+
+          <!-- Right-aligned nav content -->
+          <ul class="navbar-nav ms-auto">
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+              <span class="nav-link">Hello, {{ user.get_full_name }}!</span>
+            </li>
+            <li class="nav-item">
+              <div class="dropdown">
+                <i class='fas fa-user-cog nav-link' style='font-size:22px'></i>
+
+                <div class="dropdown-content">
+                  <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
+                  <a class="nav-link" href="{% url 'users:sign_out' %}">Sign Out</a>
+                </div>
+              </div>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'users:sign_in' %}">Sign In</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!--Main Content-->
+    <main>{% block content %}{% endblock %}</main>
+
+   <!-- Footer -->
+<footer class="border-top py-1" style="margin-top: 50px;">
+  {% block footer %}
+  <div class="container">
+    <div class="row g-1 align-items-center text-center">
+      <div class="col-12">
+        <a href="/" class="text-decoration-none">
+          <i class="bi bi-check2-square h5"></i>
+        </a>
+      </div>
+
+      <!-- Navigation Links -->
+      <!-- <div class="col-12">
+        <ul class="nav justify-content-center">
+          <li class="nav-item">
+            <a href="{% url 'home' %}" class="nav-link px-1 text-body-secondary">Home</a>
+            <li class="nav-item">
+              {% if request.resolver_match.url_name == 'home' %}
+                <a href="#about" class="nav-link px-1 text-body-secondary">About</a>
+              {% else %}
+                <a href="{% url 'home' %}#about" class="nav-link px-1 text-body-secondary">About</a> 
+              {% endif %}
+            </li>            
+          <li class="nav-item">
+            <a href="{% url 'courses:course_list' %}" class="nav-link px-1 text-body-secondary">Courses</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'assignments:assignment_list' %}" class="nav-link px-1 text-body-secondary">My Assignments</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'assignments:calendar' %}" class="nav-link px-1 text-body-secondary">Calendar</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'assignments:file_search' %}" class="nav-link px-1 text-body-secondary">Search</a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'discussions:discussion_list' %}" class="nav-link px-1 text-body-secondary">Discussions</a>
+          </li>
+          {% if user.profile.role == 'admin' %}
+          <li class="nav-item">
+            <a href="#" class="nav-link px-1 text-body-secondary">Students</a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link px-1 text-body-secondary">Assignments</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div> -->
+
+      <!-- Info Text -->
+      <div class="col-12">
+        <div class="d-flex flex-column gap-2 text-body-secondary" style="font-size: 0.75rem;">
+          <p class="mb-0">© 2024 TEAM A-04</p>
+          <p class="mb-0">This project is part of CS 3240 coursework at the University of Virginia. The system is not monitored, and no real information should be submitted.</p>
+          <p class="mb-0">Isaac Coles | Samuel Honigblum | Jessica Choi | Huyen Huynh</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+</footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
+
+<style>
+.shadow-card {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  border: none;
+}
+
+.shadow-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+footer {
+  width: 100%;
+  background-color: #fff;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+html {
+  scroll-behavior: smooth;
+}    
+
+.nav-link:hover {
+  color: #3498db !important;
+}
+
+.text-primary {
+  color: #3498db !important;
+}
+
+.bg-primary {
+  background: linear-gradient(145deg, #3498db, #2980b9) !important;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+  right: 0;
+}
+
+/* keyword tags */
+.tag {
+    display: inline-block;
+    background-color: #e9ecef;
+    border-radius: 16px;
+    padding: 4px 12px;
+    margin: 4px;
+    font-size: 14px;
+}
+
+.tag-delete {
+    color: #dc3545;
+    margin-left: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: color 0.2s ease;
+}
+
+.tag-delete:hover {
+    color: #bd2130;
+}
+
+.tags-display {
+    margin-top: 10px;
+    min-height: 35px;
+}
+
+</style>

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Course Discussions</h1>
+        {% if user.is_authenticated and user.profile.role != 'admin' %}
+        {% with text="Start New Discussion" variant="primary" data_bs_toggle="modal" data_bs_target="#addDiscussionModal" %}
+                    {% include "button.html" %}
+        {% endwith %}
+        {% endif %}
+    </div>
+
+    <!-- Course Filter Dropdown -->
+    <div class="mb-4">
+        <select class="form-select" id="courseFilter" onchange="filterDiscussions()">
+            <option value="">All {% if user.is_authenticated and user.profile.role != 'admin' %}My{% endif %} Courses</option>
+            {% for course in courses %}
+            <option value="{{ course.id }}" {% if selected_course|stringformat:"s" == course.id|stringformat:"s" %}selected{% endif %}>
+                {{ course.course_number }} - {{ course.course_name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% if discussions %}
+    <div class="list-group">
+        {% for discussion in discussions %}
+        <div class="list-group-item shadow-card">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">
+                    <a href="{% url 'discussions:discussion_detail' discussion.id %}" class="text-decoration-none">
+                        {{ discussion.title }}
+                    </a>
+                </h5>
+                <span class="badge bg-primary">{{ discussion.course.name }}</span>
+            </div>
+            <p class="mb-1">{{ discussion.content|truncatewords:30 }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    Posted by {{ discussion.user.get_full_name }} on {{ discussion.created_at|date:"M d, Y" }}
+                </small>
+                <small class="text-muted">
+                    <i class="bi bi-chat"></i> {{ discussion.comments.count }} comments
+                </small>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No discussions found. Start a new discussion!
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Discussion Modal -->
+<div class="modal fade" id="addDiscussionModal" tabindex="-1" aria-labelledby="addDiscussionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addDiscussionModalLabel">Start New Discussion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'discussions:add_discussion' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="course" class="form-label">Course</label>
+                        <select class="form-control" id="course" name="course" required>
+                            {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Create Discussion</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function filterDiscussions() {
+        const courseId = document.getElementById('courseFilter').value;
+        if (courseId) {
+            window.location.href = `?course=${courseId}`;
+        } else {
+            window.location.href = '{% url "discussions:discussion_list" %}';
+        }
+    }
+    </script>
+{% endblock %}

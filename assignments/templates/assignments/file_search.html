@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h1>File Search</h1>
+  {% if files %}
+  <!-- Search Bar -->
+  <div class="d-flex justify-content-end mb-3">
+    <form action="" method="get" class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search Keywords..." value="{{ request.GET.q|default:'' }}">
+      {% with text="Search" variant="primary" type="submit" %}
+        {% include "button.html" %}
+      {% endwith %}
+    </form>
+  </div>
+  <!-- List of Files -->
+  <ul class="list-group">
+    {% for file in files %}
+    <li class="list-group-item shadow-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <h5>{{ file.title }}</h5>
+        <span class="badge bg-primary">{{ file.assignment.course.full_name }}</span>
+      </div>
+      {% if file.description %}
+      <p>{{ file.description }}</p>
+      {% endif %}
+      <p>Uploaded At: {{ file.uploaded_at }}</p>
+      
+      <!-- Displaying keywords -->
+      {% if file.keywords %}
+      <div class="keywords">
+        <strong>Keywords:</strong>
+        {% for keyword in file.keyword_list %}
+        <span class="keyword-tag">{{ keyword }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div>
+        <button 
+          type="button"
+          class="btn btn-secondary btn-sm"
+          data-bs-toggle="modal" 
+          data-bs-target="#fileModal{{ file.id }}">
+          View
+        </button>
+        {% if file.assignment.user == user or user.profile.role == 'admin' %}
+        <form
+          action="{% url 'assignments:delete_file' file.assignment.id file.id %}"
+          method="post"
+          style="display: inline"
+          onsubmit="return confirm('Are you sure you want to delete this file?');"
+        >
+          {% csrf_token %}
+          {% with text="Delete" variant="secondary" type="submit" additional_classes="btn-red btn-sm" %}
+            {% include "button.html" %}
+          {% endwith %}
+        </form>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <!-- File Modals -->
+  {% for file in files %}
+  <div class="modal" id="fileModal{{ file.id }}" tabindex="-1" aria-labelledby="fileModalLabel{{ file.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fileModalLabel{{ file.id }}">{{ file.title }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% if file.description %}
+            <p><strong>Description:</strong> {{ file.description }}</p>
+          {% endif %}
+          {% if file.keywords %}
+            <div class="keywords">
+              <strong>Keywords:</strong>
+              {% for keyword in file.keyword_list %}
+              <span class="keyword-tag">{{ keyword }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+          {% if file.uploaded_at %}
+            <p><strong>Uploaded:</strong> {{ file.uploaded_at|date:"F j, Y, g:i a" }}</p>
+          {% endif %}
+          
+          <embed src="{{ file.file.url }}" width="100%" height="500px">
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% else %}
+  <!-- Search Bar -->
+  <div class="d-flex justify-content-end mb-3">
+    <form action="" method="get" class="input-group">
+      <input type="text" name="q" class="form-control" placeholder="Search Keywords..." value="{{ request.GET.q|default:'' }}">
+      {% with text="Search" variant="primary" type="submit" %}
+        {% include "button.html" %}
+      {% endwith %}
+    </form>
+  </div>
+  <p>No files found.</p>
+  {% endif %}
+</div>
+
+<!-- Keep existing styles -->
+<style>
+  .keywords {
+    margin-top: 10px;
+  }
+
+  .keyword-tag {
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 0.85em;
+  }
+
+  .badge {
+    font-size: 0.9em;
+    padding: 8px 12px;
+  }
+
+  .list-group-item {
+    margin-bottom: 10px;
+  }
+
+  .list-group-item > div:last-child {
+    margin-top: 15px;
+  }
+</style>
+{% endblock %} 

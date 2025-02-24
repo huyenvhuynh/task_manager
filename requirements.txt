@@ -1,0 +1,12 @@
+django
+gunicorn
+dj-database-url
+# django-heroku # comment out when running locally
+whitenoise
+python-dotenv
+google-api-python-client
+psycopg2-binary
+boto3
+django-storages
+Pillow
+django-widget-tweaks

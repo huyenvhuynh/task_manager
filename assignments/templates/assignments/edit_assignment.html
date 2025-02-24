@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% block title %}Edit Assignment{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Assignment Details</h1>
+    <a href="{% url 'assignments:assignment_list' %}" class="text-decoration-none">
+      {% with text="Back to Assignments" variant="secondary" additional_classes="btn-grey" %}
+        {% include "button.html" %}
+      {% endwith %}
+    </a>
+  </div>
+  <div class="shadow-card">
+    <form
+      action="{% url 'assignments:edit_assignment' assignment.id %}"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input
+          type="text"
+          class="form-control"
+          id="title"
+          name="title"
+          value="{{ assignment.title }}"
+          required
+          {% if user.profile.role == 'admin' %}disabled{% endif %}
+        />
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea
+          class="form-control"
+          id="description"
+          name="description"
+          rows="3"
+          required
+          {% if user.profile.role == 'admin' %}disabled{% endif %}
+        >{{ assignment.description }}</textarea>
+      </div>
+      <div class="mb-3">
+        <label for="due_date" class="form-label">Due Date</label>
+        <input
+          type="date"
+          class="form-control"
+          id="due_date"
+          name="due_date"
+          value="{{ assignment.due_date|date:'Y-m-d' }}"
+          required
+          {% if user.profile.role == 'admin' %}disabled{% endif %}
+        />
+      </div>
+      <div class="mb-3">
+        <label for="course" class="form-label">Course</label>
+        <select class="form-control" id="course" name="course" required {% if user.profile.role == 'admin' %}disabled{% endif %}>
+            {% for course in user.profile.courses.all %}
+                <option value="{{ course.id }}" {% if course.id == assignment.course.id %}selected{% endif %}>
+                    {{ course.full_name }}
+                </option>
+            {% endfor %}
+        </select>
+      </div>
+      <div class="card-footer">
+        {% if user.profile.role != 'admin' %}
+          {% include "button.html" with type="submit" variant="primary" text="Save Changes" %}
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <div class="card shadow-card mb-4">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="card-title mb-0">Assignment Files</h3>
+      </div>
+    </div>
+    <div class="card-body p-0 fixed-height-body">
+      {% if assignment.files.all %}
+      <div class="list-group scrollable-card-content">
+        {% for file in assignment.files.all %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            {{ file.title }}
+          </div>
+          <div class="d-flex align-items-center">
+            <form 
+              action="{% url 'assignments:delete_file' assignment.id file.id %}" 
+              method="post" 
+              style="display: inline;"
+              onsubmit="return confirm('Are you sure you want to delete this file?');">
+              {% csrf_token %}
+              {% include "button.html" with variant="secondary" additional_classes="btn-red btn-sm me-2" text="Delete" type="submit" %}
+            </form>
+            <button 
+              type="button"
+              class="btn btn-secondary btn-sm"
+              data-bs-toggle="modal" 
+              data-bs-target="#fileModal{{ file.id }}">
+              View
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+        <div class="list-group-item empty-state">No files uploaded for this assignment!</div>
+      {% endif %}
+    </div>
+    <div class="card-footer">
+      {% if user.profile.role != 'admin' %}
+        {% include "button.html" with variant="primary" text="Add File" data_bs_toggle="modal" data_bs_target="#addFileModal" %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mt-2"></div>
+</div>
+
+<!-- File Modal -->
+{% for file in assignment.files.all %}
+<div class="modal" id="fileModal{{ file.id }}" tabindex="-1" aria-labelledby="fileModalLabel{{ file.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fileModalLabel{{ file.id }}">{{ file.title }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if file.description %}
+          <p><strong>Description:</strong> {{ file.description }}</p>
+        {% endif %}
+        {% if file.keywords %}
+          <p><strong>Keywords:</strong> {{ file.keywords }}</p>
+        {% endif %}
+        {% if file.uploaded_at %}
+          <p><strong>Uploaded:</strong> {{ file.uploaded_at|date:"F j, Y, g:i a" }}</p>
+        {% endif %}
+        
+        <embed src="{{ file.file.url }}" width="100%" height="500px">
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<!-- Add File Modal -->
+<div class="modal" id="addFileModal" tabindex="-1" aria-labelledby="addFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFileModalLabel">Add File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'assignments:edit_assignment' assignment.id %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <!-- Hidden fields to preserve assignment data -->
+                    <input type="hidden" name="title" value="{{ assignment.title }}">
+                    <input type="hidden" name="description" value="{{ assignment.description }}">
+                    <input type="hidden" name="due_date" value="{{ assignment.due_date|date:'Y-m-d' }}">
+                    <input type="hidden" name="course" value="{{ assignment.course.id }}">
+                    
+                    <div class="mb-3">
+                        <label for="file_upload" class="form-label">Upload File</label>
+                        <input type="file" class="form-control" id="file_upload" name="file_upload" required />
+                    </div>
+
+                    <!-- File Meta Data Section -->
+                    <div class="mb-3">
+                        <div id="metadataContainer">
+                            <div class="mb-2">
+                                <input type="text" class="form-control" id="file_title" name="file-title" placeholder="File Title" />
+                            </div>
+                            <div class="mb-2">
+                                <textarea class="form-control" id="file_description" name="file-description" rows="2" placeholder="File Description"></textarea>
+                            </div>
+                            <div class="tags-input-container d-flex">
+                                <input type="text" class="form-control me-2" id="keywords-input" placeholder="Add Keyword" />
+                                {% with text="Add" variant="primary" size="sm" onclick="addTag()" %}
+                                    {% include "button.html" %}
+                                {% endwith %}
+                            </div>
+                            <div id="tagsDisplay" class="tags-display"><strong>Keywords: </strong></div>
+                            <input type="hidden" name="keywords" id="keywords" />
+                        </div>
+                    </div>
+                    {% with text="Upload" variant="primary" type="submit" %}
+                        {% include "button.html" %}
+                    {% endwith %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.fixed-height-body {
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.scrollable-card-content {
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    flex: 1;
+}
+
+.scrollable-card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.scrollable-card-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background: linear-gradient(145deg, #f8f9fa, #fff);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 1.5rem;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.badge.bg-warning {
+    font-weight: 500;
+}
+
+.badge.bg-info {
+    font-weight: 500;
+}
+
+.empty-state {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+
+.keywords {
+    margin-top: 10px;
+}
+
+.keyword-tag {
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 0.85em;
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function addTag() {
+        const input = document.getElementById("keywords-input");
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+
+        let tag = input.value.trim();
+        if (tag) {
+            const tagElement = document.createElement("span");
+            tagElement.className = "tag";
+            tagElement.textContent = tag;
+
+            const deleteButton = document.createElement("span");
+            deleteButton.className = "tag-delete";
+            deleteButton.textContent = "×  ";
+            deleteButton.onclick = function() {
+                tagsDisplay.removeChild(tagElement);
+                updateHiddenInput();
+            };
+
+            tagElement.appendChild(deleteButton);
+            tagsDisplay.appendChild(tagElement);
+
+            input.value = "";
+            updateHiddenInput();
+        }
+    }
+
+    function updateHiddenInput() {
+        const tagsDisplay = document.getElementById("tagsDisplay");
+        const hiddenInput = document.getElementById("keywords");
+        const tags = Array.from(tagsDisplay.getElementsByClassName("tag"))
+            .map(tag => tag.firstChild.textContent.trim());
+        hiddenInput.value = tags.join(",");
+    }
+</script>
+{% endblock %}
